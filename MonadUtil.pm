@@ -6,10 +6,10 @@ use Exporter 'import';
 
 our @EXPORT = qw/m_unit m_join m_map m_bind m_lift2/;
 
-sub m_unit($) {
-	my $v = shift;
+sub m_unit {
+	my @v = @_;
 	my $cv = AE::cv;
-	$cv->send($v);
+	$cv->send(@v);
 
 	return $cv;
 }
@@ -21,8 +21,8 @@ sub m_join($) {
 	$cv2->cb(sub {
 		my $cv = $_[0]->recv;
 		$cv->cb(sub {
-			my $v = $_[0]->recv;
-			$cv_mixed->send($v);
+			my @v = $_[0]->recv;
+			$cv_mixed->send(@v);
 		});
 	});
 
@@ -35,8 +35,8 @@ sub m_map($) {
 		my $cv = shift;
 		my $cv_result = AE::cv;
 		$cv->cb(sub {
-			my $v = $_[0]->recv;
-			$cv_result->send($f->($v));
+			my @v = $_[0]->recv;
+			$cv_result->send($f->(@v));
 		});
 
 		return $cv_result;
@@ -54,10 +54,10 @@ sub m_lift2(&) {
 	sub {
 		my ($cv_a, $cv_b) = @_;
 		m_bind $cv_a => sub {
-			my $v_a = shift;
+			my @v_a = @_;
 			m_bind $cv_b => sub {
-				my $v_b = shift;
-				m_unit $f->($v_a, $v_b);
+				my @v_b = @_;
+				m_unit $f->(@v_a, @v_b);
 			};
 		};
 	};
