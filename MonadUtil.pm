@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Exporter 'import';
 
-our @EXPORT = qw/m_unit m_join m_map m_bind/;
+our @EXPORT = qw/m_unit m_join m_map m_bind m_lift2/;
 
 sub m_unit($) {
 	my $v = shift;
@@ -47,6 +47,20 @@ sub m_bind($$) {
 	my ($cv, $f) = @_;
 	my $cv2 = (m_map $f)->($cv);
 	return m_join $cv2;
+}
+
+sub m_lift2(&) {
+	my $f = shift;
+	sub {
+		my ($cv_a, $cv_b) = @_;
+		m_bind $cv_a => sub {
+			my $v_a = shift;
+			m_bind $cv_b => sub {
+				my $v_b = shift;
+				m_unit $f->($v_a, $v_b);
+			};
+		};
+	};
 }
 
 1;
