@@ -24,10 +24,14 @@ sub m_join($) {
 
 	my $cv_mixed = AE::cv;
 	$cv2->cb(sub {
-		my $cv = $_[0]->recv;
+		my $cv = eval { $_[0]->recv };
+		if ($@) {
+			$cv_mixed->croak($@);
+			return;
+		}
 		$cv->cb(sub {
-			my @v = $_[0]->recv;
-			$cv_mixed->send(@v);
+			my @v = eval { $_[0]->recv };
+			$@ ? $cv_mixed->croak($@) : $cv_mixed->send(@v);
 		});
 	});
 
@@ -40,8 +44,8 @@ sub m_map($) {
 		my $cv = shift;
 		my $cv_result = AE::cv;
 		$cv->cb(sub {
-			my @v = $_[0]->recv;
-			$cv_result->send($f->(@v));
+			my @v = eval { $_[0]->recv };
+			$@ ? $cv_result->croak($@) : $cv_result->send($f->(@v));
 		});
 
 		return $cv_result;
