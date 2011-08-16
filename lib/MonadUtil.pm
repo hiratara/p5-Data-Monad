@@ -19,43 +19,39 @@ sub m_unit {
 	return $cv;
 }
 
-sub m_join($) {
-	my $cv2 = shift;
+sub m_bind($$) {
+	my ($cv, $f) = @_;
 
-	my $cv_mixed = AE::cv;
-	$cv2->cb(sub {
-		my $cv = eval { $_[0]->recv };
+	my $cv_bound = AE::cv;
+	$cv->cb(sub {
+		my @v = eval { $_[0]->recv };
 		if ($@) {
-			$cv_mixed->croak($@);
-			return;
+			$cv_bound->croak($@);
+			return
 		}
+		my ($cv) = $f->(@v);
 		$cv->cb(sub {
 			my @v = eval { $_[0]->recv };
-			$@ ? $cv_mixed->croak($@) : $cv_mixed->send(@v);
+			$@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
 		});
 	});
 
-	return $cv_mixed;
+	return $cv_bound;
+}
+
+sub m_join($) {
+	my $cv2 = shift;
+
+	m_bind $cv2 => sub { @_ };
 }
 
 sub m_map($) {
 	my $f = shift;
-	return sub {
+
+	sub {
 		my $cv = shift;
-		my $cv_result = AE::cv;
-		$cv->cb(sub {
-			my @v = eval { $_[0]->recv };
-			$@ ? $cv_result->croak($@) : $cv_result->send($f->(@v));
-		});
-
-		return $cv_result;
+		m_bind $cv => composition(\&m_unit, $f);
 	};
-}
-
-sub m_bind($$) {
-	my ($cv, $f) = @_;
-	my $cv2 = (m_map $f)->($cv);
-	return m_join $cv2;
 }
 
 sub m_lift2(&) {
