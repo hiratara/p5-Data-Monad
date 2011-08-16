@@ -4,7 +4,12 @@ use strict;
 use warnings;
 use Exporter 'import';
 
-our @EXPORT = qw/m_unit m_join m_map m_bind m_lift2/;
+our @EXPORT = qw/composition m_unit m_join m_map m_bind m_lift2/;
+
+sub composition($$) {
+	my ($g, $f) = @_;
+	sub { $g->($f->(@_)) };
+}
 
 sub m_unit {
 	my @v = @_;
