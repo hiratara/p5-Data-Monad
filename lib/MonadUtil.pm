@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Exporter 'import';
 
-our @EXPORT = qw/composition m_unit m_join m_map m_bind m_lift2/;
+our @EXPORT = qw/composition m_unit m_join m_map m_bind m_lift2 m_call_cc/;
 
 sub composition($$) {
 	my ($g, $f) = @_;
@@ -66,6 +66,25 @@ sub m_lift2(&) {
 			};
 		};
 	};
+}
+
+sub m_call_cc(&) {
+	my $f = shift;
+	my $ret_cv = AE::cv;
+
+	my $skip = sub {
+		my @v = @_;
+		$ret_cv->send(@v);
+
+		return AE::cv; # nop
+	};
+
+	$f->($skip)->cb(sub {
+		my @v = eval { $_[0]->recv };
+		$@ ? $ret_cv->croak($@) : $ret_cv->send(@v);
+	});
+
+	return $ret_cv;
 }
 
 1;
