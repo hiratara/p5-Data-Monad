@@ -1,8 +1,10 @@
 use strict;
 use warnings;
-use MonadUtil;
+use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
+
+my $m = Data::Monad::AECV->monad;
 
 my $cv213 = do {
 	my $cv = AE::cv;
@@ -10,27 +12,27 @@ my $cv213 = do {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$cv;
+	$m->new(cv => $cv);
 };
 
 sub create_cv($) {
 	my $should_skip = shift;
-	my $cv1 = m_bind $cv213 => sub {
+	my $cv1 = $cv213->bind(sub {
 		my @v = @_;
 
-		m_call_cc {
+		$m->call_cc(sub {
 			my $skip = shift;
 
-			my $cv213 = m_unit @v;
-			my $cv426 = m_bind $cv213 => sub { m_unit map { $_ * 2 } @_ };
-			my $cv_skipped = m_bind $cv426 => sub {
-				$should_skip ? $skip->(@_) : m_unit @_
-			};
+			my $cv213 = $m->unit(@v);
+			my $cv426 = $cv213->bind(sub { $m->unit(map { $_ * 2 } @_) });
+			my $cv_skipped = $cv426->bind(sub {
+				$should_skip ? $skip->(@_) : $m->unit(@_)
+			});
 
-			return m_bind $cv_skipped => sub { m_unit map { $_ * 2 } @_ };
-		};
-	};
-	return m_bind $cv1 => sub { m_unit map { $_ * 3 } @_ };
+			return $cv_skipped->bind(sub { $m->unit(map { $_ * 2 } @_) });
+		});
+	});
+	return $cv1->bind(sub { $m->unit(map { $_ * 3 } @_) });
 }
 
 

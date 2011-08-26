@@ -1,8 +1,10 @@
 use strict;
 use warnings;
-use MonadUtil;
+use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
+
+my $m = Data::Monad::AECV->monad;
 
 my $cv213 = do {
 	my $cv = AE::cv;
@@ -10,15 +12,15 @@ my $cv213 = do {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$cv;
+	$m->new(cv => $cv);
 };
 
-is_deeply [m_binds($cv213 => sub {
+is_deeply [$cv213->binds(sub {
 	my @values = @_;
-	m_unit map {$_ * 2} @values;
+	$m->unit(map {$_ * 2} @values);
 }, sub {
 	my @values = @_;
-	m_unit map {$_ - 1} @values;
+	$m->unit(map {$_ - 1} @values);
 })->recv], [3, 1, 5];
 
 done_testing;

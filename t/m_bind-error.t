@@ -1,8 +1,10 @@
 use strict;
 use warnings;
-use MonadUtil;
+use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
+
+my $m = Data::Monad::AECV->monad;
 
 my $cv213 = do {
 	my $cv = AE::cv;
@@ -10,7 +12,7 @@ my $cv213 = do {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$cv;
+	$m->new(cv => $cv);
 };
 
 my $f = sub {
@@ -18,14 +20,12 @@ my $f = sub {
 
 	my $cv = AE::cv;
 	$cv->croak(join '', @v, "\n");
-	return $cv;
+	return $m->new(cv => $cv);
 };
 
-my $g = sub {
-	m_unit map {$_ * 2} @_
-};
+my $g = sub { $m->unit(map {$_ * 2} @_) };
 
-my $ret_cv = m_bind +(m_bind $cv213 => $f) => $g;
+my $ret_cv = $cv213->bind($f)->bind($g);
 eval { $ret_cv->recv };
 like $@, qr/\b213\b/;
 

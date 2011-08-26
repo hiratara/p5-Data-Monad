@@ -1,0 +1,2 @@
+require AnyEvent
+require Class::Accessor::Lite

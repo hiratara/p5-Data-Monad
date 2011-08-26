@@ -1,21 +1,21 @@
 use strict;
 use warnings;
-use MonadUtil;
+use Data::Monad::AECV;
 use AnyEvent::HTTP;
 use AnyEvent::Util;
 
-print m_binds(m_unit("http://www.google.com") => sub {
+print Data::Monad::AECV->unit("http://www.google.com")->binds(sub {
 	my $url = shift;
 	my $ret_cv = AE::cv;
 	http_get $url, sub {
 		$ret_cv->send($_[0]);
 	};
-	return $ret_cv;
+	return Data::Monad::AECV->new(cv => $ret_cv);
 }, sub {
 	my $html = shift;
 
 	my $ret;
-	m_bind AnyEvent::Util::run_cmd(
+	Data::Monad::AECV->new(cv => AnyEvent::Util::run_cmd(
 		[qw/wc /], '<' => \$html, '>' => \$ret,
-	) => sub {m_unit $ret};
+	))->bind(sub { Data::Monad::AECV->unit($ret) });
 })->recv, "\n";

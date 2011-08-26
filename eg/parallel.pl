@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use MonadUtil;
+use Data::Monad::AECV;
 use AnyEvent::HTTP;
 use AnyEvent::Util;
 
@@ -13,15 +13,15 @@ sub m_after_n {
 		$cv->send(@m);
 		undef $t;
 	};
-	return $cv;
+	return Data::Monad::AECV->new(cv => $cv);
 }
 
-my $ret_cv = (m_lift2 {map {$_ * 2} @_})->(
+my $ret_cv = Data::Monad::AECV->lift(sub {map {$_ * 2} @_})->(
 	m_after_n(2, 4, 5 => 4), m_after_n(1, 3, 5 => 5)
 );
 
-my $ret_cv2 = m_bind $ret_cv => sub {
+my $ret_cv2 = $ret_cv->bind(sub {
 	my @values = @_;
 	m_after_n +(map { chr(ord('a') + $_) } @values) => 2;
-};
+});
 print $ret_cv2->recv, "\n";
