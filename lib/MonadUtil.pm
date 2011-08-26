@@ -4,7 +4,9 @@ use strict;
 use warnings;
 use Exporter 'import';
 
-our @EXPORT = qw/composition m_unit m_join m_map m_bind m_lift2 m_call_cc/;
+our @EXPORT = qw/
+	composition m_unit m_join m_map m_bind m_lift2 m_call_cc m_binds
+/;
 
 sub composition($$) {
 	my ($g, $f) = @_;
@@ -66,6 +68,14 @@ sub m_lift2(&) {
 			};
 		};
 	};
+}
+
+sub m_binds($@) {
+	my ($cv, @blocks) = @_;
+
+	$cv = m_bind $cv => $_ for @blocks;
+
+	return $cv;
 }
 
 sub m_call_cc(&) {
