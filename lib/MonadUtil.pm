@@ -5,7 +5,7 @@ use warnings;
 use Exporter 'import';
 
 our @EXPORT = qw/
-	composition m_unit m_join m_map m_bind m_lift2 m_call_cc m_binds
+	composition m_unit m_join m_map m_bind m_lift m_call_cc m_binds
 /;
 
 sub composition($$) {
@@ -56,18 +56,23 @@ sub m_map($) {
 	};
 }
 
-sub m_lift2(&) {
+sub m_lift(&) {
 	my $f = shift;
-	sub {
-		my ($cv_a, $cv_b) = @_;
-		m_bind $cv_a => sub {
-			my @v_a = @_;
-			m_bind $cv_b => sub {
-				my @v_b = @_;
-				m_unit $f->(@v_a, @v_b);
-			};
-		};
+
+	my $loop; $loop = sub {
+		my ($m_list, $arg_list) = @_;
+
+		if (@$m_list) {
+			my $car = $m_list->[0];
+			my @cdr = @{$m_list}[1 .. $#{$m_list}];
+
+			return m_bind $car => sub { $loop->(\@cdr, [@$arg_list, @_]) };
+		} else {
+			return m_unit $f->(@$arg_list);
+		}
 	};
+
+	sub { $loop->(\@_, []) };
 }
 
 sub m_binds($@) {
