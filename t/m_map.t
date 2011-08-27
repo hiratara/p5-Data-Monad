@@ -18,17 +18,12 @@ my $cv213 = do {
 
 # preserve identity
 my $id = sub { @_ };
-my $cv_id = $m->map($id);
-is_deeply [$cv_id->($cv213)->recv], [2, 1, 3];
+is_deeply [$cv213->map($id)->recv], [2, 1, 3];
 
 # preserve associative
 my $f = sub { reverse @_ };
 my $g = sub { sort @_ };
-
-my $fg1 = $m->map(composition($g, $f));
-my $fg2 = composition($m->map($g), $m->map($f));
-
-is_deeply [$fg1->($cv213)->recv], [1, 2, 3];
-is_deeply [$fg2->($cv213)->recv], [1, 2, 3];
+is_deeply [$cv213->map(sub { $g->($f->(@_)) })->recv], [1, 2, 3];
+is_deeply [$cv213->map($f)->map($g)->recv], [1, 2, 3];
 
 done_testing;

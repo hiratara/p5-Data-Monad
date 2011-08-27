@@ -12,15 +12,6 @@ sub unit {
     die "You should override this method.";
 }
 
-sub map {
-    my ($class, $f) = @_;
-
-    sub {
-        my $m = shift;
-        $m->bind(sub {$class->unit($f->(@_))} );
-    };
-}
-
 sub lift {
     my ($class, $f) = @_;
 
@@ -51,6 +42,12 @@ sub binds {
     $self = $self->bind($_) for @blocks;
 
     return $self;
+}
+
+sub map {
+    my ($self, $f) = @_;
+
+    $self->bind(sub { (ref $self)->unit($f->(@_)) });
 }
 
 sub join {

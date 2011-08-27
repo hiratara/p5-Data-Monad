@@ -17,18 +17,11 @@ my $cv213 = do {
 
 # naturality
 my $f = sub { map {$_ * 2} @_ };
-
-my $unit_f = composition($m->map($f), sub { $m->unit(@_) });
-my $f_unit = composition(sub { $m->unit(@_) }, $f);
-is_deeply [$unit_f->(2, 1, 3)->recv], [4, 2, 6];
-is_deeply [$f_unit->(2, 1, 3)->recv], [4, 2, 6];
+is_deeply [$m->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
+is_deeply [$m->unit($f->(2, 1, 3))->recv], [4, 2, 6];
 
 # unit
-my $unit_map_join = composition(sub { $_[0]->join }, sub { $m->unit(@_) });
-my $map_unit_join = composition(
-	sub { $_[0]->join }, $m->map(sub { $m->unit(@_) })
-);
-is_deeply [$unit_map_join->($cv213)->recv], [2, 1, 3];
-is_deeply [$map_unit_join->($cv213)->recv], [2, 1, 3];
+is_deeply [$m->unit($cv213)->join->recv], [2, 1, 3];
+is_deeply [$cv213->map(sub { $m->unit(@_) })->join->recv], [2, 1, 3];
 
 done_testing;

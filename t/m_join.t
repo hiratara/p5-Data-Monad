@@ -34,21 +34,12 @@ my $cvcvcv213 = do {
 
 # naturality
 my $f = sub { map {$_ * 2} @_ };
-my $cvf = $m->map($f);
-my $cvcvf = $m->map($cvf);
-
-my $join_cvf = composition($cvf, sub { $_[0]->join });
-my $cvcvf_join = composition(sub { $_[0]->join }, $cvcvf);
-is_deeply [$join_cvf->($cvcv213)->recv], [4, 2, 6];
-is_deeply [$cvcvf_join->($cvcv213)->recv], [4, 2, 6];
+is_deeply [$cvcv213->join->map($f)->recv], [4, 2, 6];
+is_deeply [$cvcv213->map(sub { $_[0]->map($f) })->join->recv], [4, 2, 6];
 
 # associative law
-my $join_map_join = composition(sub { $_[0]->join }, sub { $_[0]->join });
-my $map_join_join = composition(
-	sub { $_[0]->join }, $m->map(sub { $_[0]->join })
-);
-is_deeply [$join_map_join->($cvcvcv213)->recv], [2, 1, 3];
-is_deeply [$map_join_join->($cvcvcv213)->recv], [2, 1, 3];
+is_deeply [$cvcvcv213->join->join->recv], [2, 1, 3];
+is_deeply [$cvcvcv213->map(sub { $_[0]->join })->join->recv], [2, 1, 3];
 
 
 done_testing;
