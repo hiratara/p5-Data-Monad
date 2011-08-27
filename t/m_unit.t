@@ -5,23 +5,24 @@ use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
 
-my $m = Data::Monad::AECV->monad;
 my $cv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 
 # naturality
 my $f = sub { map {$_ * 2} @_ };
-is_deeply [$m->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
-is_deeply [$m->unit($f->(2, 1, 3))->recv], [4, 2, 6];
+is_deeply [Data::Monad::AECV->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
+is_deeply [Data::Monad::AECV->unit($f->(2, 1, 3))->recv], [4, 2, 6];
 
 # unit
-is_deeply [$m->unit($cv213)->flatten->recv], [2, 1, 3];
-is_deeply [$cv213->map(sub { $m->unit(@_) })->flatten->recv], [2, 1, 3];
+is_deeply [Data::Monad::AECV->unit($cv213)->flatten->recv], [2, 1, 3];
+is_deeply [$cv213->map(sub {
+	Data::Monad::AECV->unit(@_);
+})->flatten->recv], [2, 1, 3];
 
 done_testing;

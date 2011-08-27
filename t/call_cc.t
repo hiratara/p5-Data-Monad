@@ -4,15 +4,13 @@ use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
 
-my $m = Data::Monad::AECV->monad;
-
 my $cv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 
 sub create_cv($) {
@@ -20,19 +18,25 @@ sub create_cv($) {
 	my $cv1 = $cv213->flat_map(sub {
 		my @v = @_;
 
-		$m->call_cc(sub {
+		Data::Monad::AECV->call_cc(sub {
 			my $skip = shift;
 
-			my $cv213 = $m->unit(@v);
-			my $cv426 = $cv213->flat_map(sub { $m->unit(map { $_ * 2 } @_) });
+			my $cv213 = Data::Monad::AECV->unit(@v);
+			my $cv426 = $cv213->flat_map(sub {
+				Data::Monad::AECV->unit(map { $_ * 2 } @_);
+			});
 			my $cv_skipped = $cv426->flat_map(sub {
-				$should_skip ? $skip->(@_) : $m->unit(@_)
+				$should_skip ? $skip->(@_) : Data::Monad::AECV->unit(@_)
 			});
 
-			return $cv_skipped->flat_map(sub { $m->unit(map { $_ * 2 } @_) });
+			return $cv_skipped->flat_map(sub {
+				Data::Monad::AECV->unit(map { $_ * 2 } @_);
+			});
 		});
 	});
-	return $cv1->flat_map(sub { $m->unit(map { $_ * 3 } @_) });
+	return $cv1->flat_map(sub {
+		Data::Monad::AECV->unit(map { $_ * 3 } @_);
+	});
 }
 
 

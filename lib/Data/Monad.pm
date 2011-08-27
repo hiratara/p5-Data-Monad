@@ -2,11 +2,6 @@ package Data::Monad;
 use strict;
 use warnings;
 
-sub monad {
-    my $class = shift;
-    return $class;
-}
-
 sub unit {
     my ($class, @v) = @_;
     die "You should override this method.";

@@ -8,12 +8,12 @@ sub m_after_n {
 	my $n = pop @_;
 	my @m = @_;
 
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer $n, 0, sub {
 		$cv->send(@m);
 		undef $t;
 	};
-	return Data::Monad::AECV->new(cv => $cv);
+	return $cv;
 }
 
 my $ret_cv = Data::Monad::AECV->lift(sub {map {$_ * 2} @_})->(

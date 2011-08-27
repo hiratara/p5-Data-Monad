@@ -4,26 +4,24 @@ use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
 
-my $m = Data::Monad::AECV->monad;
-
 my $cv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 
 my $f = sub {
 	my @v = @_;
 
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	$cv->croak(join '', @v, "\n");
-	return $m->new(cv => $cv);
+	return $cv;
 };
 
-my $g = sub { $m->unit(map {$_ * 2} @_) };
+my $g = sub { Data::Monad::AECV->unit(map {$_ * 2} @_) };
 
 my $ret_cv = $cv213->flat_map($f)->flat_map($g);
 eval { $ret_cv->recv };

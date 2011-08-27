@@ -5,31 +5,29 @@ use MonadUtil;
 use AnyEvent;
 use Test::More;
 
-my $m = Data::Monad::AECV->monad;
-
 my $cv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 my $cvcv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send($cv213);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 my $cvcvcv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send($cvcv213);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 
 # naturality

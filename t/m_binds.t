@@ -4,23 +4,21 @@ use Data::Monad::AECV;
 use AnyEvent;
 use Test::More;
 
-my $m = Data::Monad::AECV->monad;
-
 my $cv213 = do {
-	my $cv = AE::cv;
+	my $cv = AE::mcv;
 	my $t; $t = AE::timer 0, 0, sub {
 		$cv->send(2, 1, 3);
 		undef $t;
 	};
-	$m->new(cv => $cv);
+	$cv;
 };
 
 is_deeply [$cv213->flat_map(sub {
 	my @values = @_;
-	$m->unit(map {$_ * 2} @values);
+	Data::Monad::AECV->unit(map {$_ * 2} @values);
 })->flat_map(sub {
 	my @values = @_;
-	$m->unit(map {$_ - 1} @values);
+	Data::Monad::AECV->unit(map {$_ - 1} @values);
 })->recv], [3, 1, 5];
 
 done_testing;

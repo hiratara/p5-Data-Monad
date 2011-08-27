@@ -2,28 +2,30 @@ package Data::Monad::AECV;
 use strict;
 use warnings;
 use AnyEvent;
-use Class::Accessor::Lite (new => 1, rw => [qw/cv/]);
 use parent qw/Data::Monad/;
+use parent -norequire => qw/AnyEvent::CondVar/;
 
-sub _warp($) { __PACKAGE__->new(cv => $_[0]) }
+sub AE::mcv(;&) {
+    bless &AE::cv(@_), __PACKAGE__; # skip the prototype check
+}
 
 sub unit {
     my ($class, @v) = @_;
 
-    my $cv = AE::cv;
+    my $cv = AE::mcv;
     $cv->send(@v);
-    return _warp $cv;
+    return $cv;
 }
 
 sub call_cc {
     my ($class, $f) = @_;
-    my $ret_cv = AE::cv;
+    my $ret_cv = AE::mcv;
 
     my $skip = sub {
         my @v = @_;
         $ret_cv->send(@v);
 
-        return _warp AE::cv; # nop
+        return AE::mcv; # nop
     };
 
     $f->($skip)->cb(sub {
@@ -31,13 +33,13 @@ sub call_cc {
         $@ ? $ret_cv->croak($@) : $ret_cv->send(@v);
     });
 
-    return _warp $ret_cv;
+    return $ret_cv;
 }
 
 sub flat_map {
     my ($self, $f) = @_;
 
-    my $cv_bound = AE::cv;
+    my $cv_bound = AE::mcv;
     $self->cb(sub {
         my @v = eval { $_[0]->recv };
         if ($@) {
@@ -51,10 +53,7 @@ sub flat_map {
         });
     });
 
-    return _warp $cv_bound;
+    return $cv_bound;
 }
-
-sub recv { shift->cv->recv(@_) }
-sub cb   { shift->cv->cb(@_)   }
 
 1;
