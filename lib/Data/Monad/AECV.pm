@@ -1,24 +1,10 @@
 package Data::Monad::AECV;
 use strict;
 use warnings;
-use Carp ();
-use Scalar::Util ();
-use AnyEvent ();
+use AnyEvent;
 use Exporter qw/import/;
-use parent qw/Data::Monad/;
-
-# extends AE::cv directly
-push @AnyEvent::CondVar::ISA, __PACKAGE__;
 
 our @EXPORT = qw/call_cc/;
-
-sub unit {
-    my ($class, @v) = @_;
-
-    my $cv = AE::cv;
-    $cv->send(@v);
-    return $cv;
-}
 
 sub call_cc(&) {
     my $f = shift;
@@ -37,6 +23,26 @@ sub call_cc(&) {
     });
 
     return $ret_cv;
+}
+
+
+package Data::Monad::AECV::Base;
+use strict;
+use warnings;
+use Carp ();
+use Scalar::Util ();
+use AnyEvent ();
+use parent qw/Data::Monad/;
+
+# extends AE::cv directly
+push @AnyEvent::CondVar::ISA, __PACKAGE__;
+
+sub unit {
+    my ($class, @v) = @_;
+
+    my $cv = AE::cv;
+    $cv->send(@v);
+    return $cv;
 }
 
 sub flat_map {
