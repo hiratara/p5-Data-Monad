@@ -50,12 +50,11 @@ sub flat_map {
 
     my $cv_bound = AE::cv;
     $self->cb(sub {
-        my @v = eval { $_[0]->recv };
+        my ($cv) = eval { $f->($_[0]->recv) };
         if ($@) {
             $cv_bound->croak($@);
             return
         }
-        my ($cv) = $f->(@v);
         $cv->cb(sub {
             my @v = eval { $_[0]->recv };
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
