@@ -4,14 +4,14 @@ use Data::Monad::AECV;
 use AnyEvent::HTTP;
 use AnyEvent::Util;
 
-print Data::Monad::AECV->unit("http://www.google.com")->binds(sub {
+print Data::Monad::AECV->unit("http://www.google.com")->bind(sub {
 	my $url = shift;
 	my $ret_cv = AE::cv;
 	http_get $url, sub {
 		$ret_cv->send($_[0]);
 	};
 	return Data::Monad::AECV->new(cv => $ret_cv);
-}, sub {
+})->bind(sub {
 	my $html = shift;
 
 	my $ret;

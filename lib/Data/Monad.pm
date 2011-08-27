@@ -36,14 +36,6 @@ sub bind {
     die "You should override this method.";
 }
 
-sub binds {
-    my ($self, @blocks) = @_;
-
-    $self = $self->bind($_) for @blocks;
-
-    return $self;
-}
-
 sub map {
     my ($self, $f) = @_;
 
