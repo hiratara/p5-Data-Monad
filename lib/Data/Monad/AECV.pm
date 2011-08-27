@@ -4,10 +4,13 @@ use warnings;
 use Carp ();
 use Scalar::Util ();
 use AnyEvent ();
+use Exporter qw/import/;
 use parent qw/Data::Monad/;
 
 # extends AE::cv directly
 push @AnyEvent::CondVar::ISA, __PACKAGE__;
+
+our @EXPORT = qw/call_cc/;
 
 sub unit {
     my ($class, @v) = @_;
@@ -17,8 +20,8 @@ sub unit {
     return $cv;
 }
 
-sub call_cc {
-    my ($class, $f) = @_;
+sub call_cc(&) {
+    my $f = shift;
     my $ret_cv = AE::cv;
 
     my $skip = sub {

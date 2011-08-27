@@ -18,7 +18,7 @@ sub create_cv($) {
 	my $cv1 = $cv213->flat_map(sub {
 		my @v = @_;
 
-		Data::Monad::AECV->call_cc(sub {
+		call_cc {
 			my $skip = shift;
 
 			my $cv213 = Data::Monad::AECV->unit(@v);
@@ -32,7 +32,7 @@ sub create_cv($) {
 			return $cv_skipped->flat_map(sub {
 				Data::Monad::AECV->unit(map { $_ * 2 } @_);
 			});
-		});
+		};
 	});
 	return $cv1->flat_map(sub {
 		Data::Monad::AECV->unit(map { $_ * 3 } @_);
