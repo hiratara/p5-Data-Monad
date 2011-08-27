@@ -7,8 +7,8 @@ use Exporter 'import';
 our @EXPORT = qw/composition/;
 
 sub composition($$) {
-	my ($g, $f) = @_;
-	sub { $g->($f->(@_)) };
+    my ($g, $f) = @_;
+    sub { $g->($f->(@_)) };
 }
 
 1;

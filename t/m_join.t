@@ -6,28 +6,28 @@ use AnyEvent;
 use Test::More;
 
 my $cv213 = do {
-	my $cv = AE::cv;
-	my $t; $t = AE::timer 0, 0, sub {
-		$cv->send(2, 1, 3);
-		undef $t;
-	};
-	$cv;
+    my $cv = AE::cv;
+    my $t; $t = AE::timer 0, 0, sub {
+        $cv->send(2, 1, 3);
+        undef $t;
+    };
+    $cv;
 };
 my $cvcv213 = do {
-	my $cv = AE::cv;
-	my $t; $t = AE::timer 0, 0, sub {
-		$cv->send($cv213);
-		undef $t;
-	};
-	$cv;
+    my $cv = AE::cv;
+    my $t; $t = AE::timer 0, 0, sub {
+        $cv->send($cv213);
+        undef $t;
+    };
+    $cv;
 };
 my $cvcvcv213 = do {
-	my $cv = AE::cv;
-	my $t; $t = AE::timer 0, 0, sub {
-		$cv->send($cvcv213);
-		undef $t;
-	};
-	$cv;
+    my $cv = AE::cv;
+    my $t; $t = AE::timer 0, 0, sub {
+        $cv->send($cvcv213);
+        undef $t;
+    };
+    $cv;
 };
 
 # naturality
