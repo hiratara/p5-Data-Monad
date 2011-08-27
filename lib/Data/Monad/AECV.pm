@@ -1,12 +1,21 @@
 package Data::Monad::AECV;
 use strict;
 use warnings;
+use Carp ();
+use Scalar::Util ();
 use AnyEvent;
 use parent qw/Data::Monad/;
 use parent -norequire => qw/AnyEvent::CondVar/;
 
 sub AE::mcv(;&) {
     bless &AE::cv(@_), __PACKAGE__; # skip the prototype check
+}
+
+sub AE::to_mcv($) {
+    my $cv = shift;
+    Scalar::Util::blessed $cv and $cv->isa('AnyEvent::CondVar')
+              or Carp::croak "can't upgrade " . ref $cv . " to " . __PACKAGE__;
+    bless $cv, __PACKAGE__; # skip the prototype check
 }
 
 sub unit {

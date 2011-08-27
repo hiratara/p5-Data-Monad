@@ -15,7 +15,7 @@ print Data::Monad::AECV->unit("http://www.google.com")->flat_map(sub {
 	my $html = shift;
 
 	my $ret;
-	bless(AnyEvent::Util::run_cmd(
+	AE::to_mcv(AnyEvent::Util::run_cmd(
 		[qw/wc /], '<' => \$html, '>' => \$ret,
-	), 'Data::Monad::AECV')->flat_map(sub { Data::Monad::AECV->unit($ret) });
+	))->flat_map(sub { Data::Monad::AECV->unit($ret) });
 })->recv, "\n";
