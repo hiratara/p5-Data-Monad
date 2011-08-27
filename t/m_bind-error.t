@@ -25,7 +25,7 @@ my $f = sub {
 
 my $g = sub { $m->unit(map {$_ * 2} @_) };
 
-my $ret_cv = $cv213->bind($f)->bind($g);
+my $ret_cv = $cv213->flat_map($f)->flat_map($g);
 eval { $ret_cv->recv };
 like $@, qr/\b213\b/;
 

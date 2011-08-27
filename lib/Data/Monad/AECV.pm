@@ -34,7 +34,7 @@ sub call_cc {
     return _warp $ret_cv;
 }
 
-sub bind {
+sub flat_map {
     my ($self, $f) = @_;
 
     my $cv_bound = AE::cv;

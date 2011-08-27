@@ -17,22 +17,22 @@ my $cv213 = do {
 
 sub create_cv($) {
 	my $should_skip = shift;
-	my $cv1 = $cv213->bind(sub {
+	my $cv1 = $cv213->flat_map(sub {
 		my @v = @_;
 
 		$m->call_cc(sub {
 			my $skip = shift;
 
 			my $cv213 = $m->unit(@v);
-			my $cv426 = $cv213->bind(sub { $m->unit(map { $_ * 2 } @_) });
-			my $cv_skipped = $cv426->bind(sub {
+			my $cv426 = $cv213->flat_map(sub { $m->unit(map { $_ * 2 } @_) });
+			my $cv_skipped = $cv426->flat_map(sub {
 				$should_skip ? $skip->(@_) : $m->unit(@_)
 			});
 
-			return $cv_skipped->bind(sub { $m->unit(map { $_ * 2 } @_) });
+			return $cv_skipped->flat_map(sub { $m->unit(map { $_ * 2 } @_) });
 		});
 	});
-	return $cv1->bind(sub { $m->unit(map { $_ * 3 } @_) });
+	return $cv1->flat_map(sub { $m->unit(map { $_ * 3 } @_) });
 }
 
 

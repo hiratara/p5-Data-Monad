@@ -22,7 +22,7 @@ sub lift {
             my $car = $m_list->[0];
             my @cdr = @{$m_list}[1 .. $#{$m_list}];
 
-            return $car->bind(sub { $loop->(\@cdr, [@$arg_list, @_]) });
+            return $car->flat_map(sub { $loop->(\@cdr, [@$arg_list, @_]) });
         } else {
             return $class->unit($f->(@$arg_list));
         }
@@ -31,7 +31,7 @@ sub lift {
     sub { $loop->(\@_, []) };
 }
 
-sub bind {
+sub flat_map {
     my ($self, $f) = @_;
     die "You should override this method.";
 }
@@ -39,13 +39,13 @@ sub bind {
 sub map {
     my ($self, $f) = @_;
 
-    $self->bind(sub { (ref $self)->unit($f->(@_)) });
+    $self->flat_map(sub { (ref $self)->unit($f->(@_)) });
 }
 
 sub join {
     my $self_duplexed = shift;
 
-    $self_duplexed->bind(sub { @_ });
+    $self_duplexed->flat_map(sub { @_ });
 }
 
 1;

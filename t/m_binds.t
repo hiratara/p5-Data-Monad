@@ -15,10 +15,10 @@ my $cv213 = do {
 	$m->new(cv => $cv);
 };
 
-is_deeply [$cv213->bind(sub {
+is_deeply [$cv213->flat_map(sub {
 	my @values = @_;
 	$m->unit(map {$_ * 2} @values);
-})->bind(sub {
+})->flat_map(sub {
 	my @values = @_;
 	$m->unit(map {$_ - 1} @values);
 })->recv], [3, 1, 5];
