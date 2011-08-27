@@ -16,13 +16,13 @@ my $cv213 = do {
 
 # naturality
 my $f = sub { map {$_ * 2} @_ };
-is_deeply [Data::Monad::AECV->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
-is_deeply [Data::Monad::AECV->unit($f->(2, 1, 3))->recv], [4, 2, 6];
+is_deeply [AnyEvent::CondVar->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
+is_deeply [AnyEvent::CondVar->unit($f->(2, 1, 3))->recv], [4, 2, 6];
 
 # unit
-is_deeply [Data::Monad::AECV->unit($cv213)->flatten->recv], [2, 1, 3];
+is_deeply [AnyEvent::CondVar->unit($cv213)->flatten->recv], [2, 1, 3];
 is_deeply [$cv213->map(sub {
-	Data::Monad::AECV->unit(@_);
+	AnyEvent::CondVar->unit(@_);
 })->flatten->recv], [2, 1, 3];
 
 done_testing;

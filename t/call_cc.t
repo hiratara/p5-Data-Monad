@@ -21,21 +21,21 @@ sub create_cv($) {
 		call_cc {
 			my $skip = shift;
 
-			my $cv213 = Data::Monad::AECV->unit(@v);
+			my $cv213 = AnyEvent::CondVar->unit(@v);
 			my $cv426 = $cv213->flat_map(sub {
-				Data::Monad::AECV->unit(map { $_ * 2 } @_);
+				AnyEvent::CondVar->unit(map { $_ * 2 } @_);
 			});
 			my $cv_skipped = $cv426->flat_map(sub {
-				$should_skip ? $skip->(@_) : Data::Monad::AECV->unit(@_)
+				$should_skip ? $skip->(@_) : AnyEvent::CondVar->unit(@_)
 			});
 
 			return $cv_skipped->flat_map(sub {
-				Data::Monad::AECV->unit(map { $_ * 2 } @_);
+				AnyEvent::CondVar->unit(map { $_ * 2 } @_);
 			});
 		};
 	});
 	return $cv1->flat_map(sub {
-		Data::Monad::AECV->unit(map { $_ * 3 } @_);
+		AnyEvent::CondVar->unit(map { $_ * 3 } @_);
 	});
 }
 

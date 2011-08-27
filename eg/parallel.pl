@@ -16,7 +16,7 @@ sub m_after_n {
 	return $cv;
 }
 
-my $ret_cv = Data::Monad::AECV->lift(sub {map {$_ * 2} @_})->(
+my $ret_cv = AnyEvent::CondVar->lift(sub {map {$_ * 2} @_})->(
 	m_after_n(2, 4, 5 => 4), m_after_n(1, 3, 5 => 5)
 );
 

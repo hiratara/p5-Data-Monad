@@ -21,7 +21,7 @@ my $f = sub {
 	return $cv;
 };
 
-my $g = sub { Data::Monad::AECV->unit(map {$_ * 2} @_) };
+my $g = sub { AnyEvent::CondVar->unit(map {$_ * 2} @_) };
 
 my $ret_cv = $cv213->flat_map($f)->flat_map($g);
 eval { $ret_cv->recv };

@@ -14,7 +14,7 @@ sub sleep_and_send($@) {
 	$cv;
 }
 
-is +Data::Monad::AECV->lift(sub { my $n = 0; $n += $_ for @_; $n })->(
+is +AnyEvent::CondVar->lift(sub { my $n = 0; $n += $_ for @_; $n })->(
 	sleep_and_send(2 => 2),
 	sleep_and_send(0 => 3),
 	sleep_and_send(1 => 4),
