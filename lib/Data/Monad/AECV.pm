@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp ();
 use Scalar::Util ();
-use AnyEvent;
+use AnyEvent ();
 use parent qw/Data::Monad/;
 use parent -norequire => qw/AnyEvent::CondVar/;
 
