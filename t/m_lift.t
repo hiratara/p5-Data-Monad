@@ -6,7 +6,7 @@ use Test::More;
 
 sub sleep_and_send($@) {
 	my ($sec, @values) = @_;
-	my $cv = AE::mcv;
+	my $cv = AE::cv;
 	my $t; $t = AE::timer $sec, 0, sub {
 		$cv->send(@values);
 		undef $t;

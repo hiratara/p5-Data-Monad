@@ -8,7 +8,7 @@ sub m_after_n {
 	my $n = pop @_;
 	my @m = @_;
 
-	my $cv = AE::mcv;
+	my $cv = AE::cv;
 	my $t; $t = AE::timer $n, 0, sub {
 		$cv->send(@m);
 		undef $t;

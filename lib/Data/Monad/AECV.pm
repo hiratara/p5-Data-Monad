@@ -5,36 +5,27 @@ use Carp ();
 use Scalar::Util ();
 use AnyEvent ();
 use parent qw/Data::Monad/;
-use parent -norequire => qw/AnyEvent::CondVar/;
 
-sub AE::mcv(;&) {
-    bless &AE::cv(@_), __PACKAGE__; # skip the prototype check
-}
-
-sub AE::to_mcv($) {
-    my $cv = shift;
-    Scalar::Util::blessed $cv and $cv->isa('AnyEvent::CondVar')
-              or Carp::croak "can't upgrade " . ref $cv . " to " . __PACKAGE__;
-    bless $cv, __PACKAGE__; # skip the prototype check
-}
+# extends AE::cv directly
+push @AnyEvent::CondVar::ISA, __PACKAGE__;
 
 sub unit {
     my ($class, @v) = @_;
 
-    my $cv = AE::mcv;
+    my $cv = AE::cv;
     $cv->send(@v);
     return $cv;
 }
 
 sub call_cc {
     my ($class, $f) = @_;
-    my $ret_cv = AE::mcv;
+    my $ret_cv = AE::cv;
 
     my $skip = sub {
         my @v = @_;
         $ret_cv->send(@v);
 
-        return AE::mcv; # nop
+        return AE::cv; # nop
     };
 
     $f->($skip)->cb(sub {
@@ -48,7 +39,7 @@ sub call_cc {
 sub flat_map {
     my ($self, $f) = @_;
 
-    my $cv_bound = AE::mcv;
+    my $cv_bound = AE::cv;
     $self->cb(sub {
         my @v = eval { $_[0]->recv };
         if ($@) {
