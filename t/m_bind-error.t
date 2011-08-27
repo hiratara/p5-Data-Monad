@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Data::Monad::AECV;
+use Data::Monad::CondVar;
 use AnyEvent;
 use Test::More;
 

@@ -1,4 +1,4 @@
-package Data::Monad::AECV;
+package Data::Monad::CondVar;
 use strict;
 use warnings;
 use AnyEvent;
@@ -26,7 +26,7 @@ sub call_cc(&) {
 }
 
 
-package Data::Monad::AECV::Base;
+package Data::Monad::CondVar::Mixin;
 use strict;
 use warnings;
 use Carp ();
