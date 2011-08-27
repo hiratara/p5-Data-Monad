@@ -42,7 +42,7 @@ sub map {
     $self->flat_map(sub { (ref $self)->unit($f->(@_)) });
 }
 
-sub join {
+sub flatten {
     my $self_duplexed = shift;
 
     $self_duplexed->flat_map(sub { @_ });

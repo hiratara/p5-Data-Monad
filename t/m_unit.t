@@ -21,7 +21,7 @@ is_deeply [$m->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
 is_deeply [$m->unit($f->(2, 1, 3))->recv], [4, 2, 6];
 
 # unit
-is_deeply [$m->unit($cv213)->join->recv], [2, 1, 3];
-is_deeply [$cv213->map(sub { $m->unit(@_) })->join->recv], [2, 1, 3];
+is_deeply [$m->unit($cv213)->flatten->recv], [2, 1, 3];
+is_deeply [$cv213->map(sub { $m->unit(@_) })->flatten->recv], [2, 1, 3];
 
 done_testing;
