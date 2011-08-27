@@ -32,10 +32,10 @@ use warnings;
 use Carp ();
 use Scalar::Util ();
 use AnyEvent ();
-use parent qw/Data::Monad/;
 
 # extends AE::cv directly
-push @AnyEvent::CondVar::ISA, __PACKAGE__;
+require Data::Monad;
+push @AnyEvent::CondVar::ISA, __PACKAGE__, 'Data::Monad';
 
 sub unit {
     my ($class, @v) = @_;
