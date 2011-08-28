@@ -37,7 +37,7 @@ sub for {
         if (@blocks) {
             return $m->flat_map(sub {
                 # capture values for nested blocks.
-                ref $ref eq 'ARRAY' ? @$ref = @_ : $$ref = shift;
+                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = shift);
                 $loop->(@blocks)
             });
         } else {
