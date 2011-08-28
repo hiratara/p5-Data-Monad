@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use MonadUtil;
 use Data::Monad::CondVar;
 use AnyEvent;
 use Test::More;
