@@ -10,20 +10,19 @@ sub unit {
 sub lift {
     my ($class, $f) = @_;
 
-    my $loop; $loop = sub {
-        my ($m_list, $arg_list) = @_;
+    sub {
+        my @ms = @_;
+        my @args = (undef) x @ms;
 
-        if (@$m_list) {
-            my $car = $m_list->[0];
-            my @cdr = @{$m_list}[1 .. $#{$m_list}];
-
-            return $car->flat_map(sub { $loop->(\@cdr, [@$arg_list, @_]) });
-        } else {
-            return $class->unit($f->(@$arg_list));
-        }
+        $class->for(
+            (map {
+                my $i = $_;
+                # capture each value in each slot of @args
+                sub { $ms[$i] } => ($args[$i] = []);
+            } 0 .. $#ms),
+            sub { $class->unit($f->(map { @$_ } @args)) }
+        );
     };
-
-    sub { $loop->(\@_, []) };
 }
 
 sub for {
