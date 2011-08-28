@@ -26,6 +26,28 @@ sub lift {
     sub { $loop->(\@_, []) };
 }
 
+sub for {
+    my ($class, @blocks) = @_;
+
+    my $loop; $loop = sub {
+        my @blocks = @_;
+        my $m = (shift @blocks)->();
+        my $ref = shift @blocks unless ref $blocks[0] eq 'CODE';
+
+        if (@blocks) {
+            return $m->flat_map(sub {
+                # capture values for nested blocks.
+                ref $ref eq 'ARRAY' ? @$ref = @_ : $$ref = shift;
+                $loop->(@blocks)
+            });
+        } else {
+            return $m;
+        }
+    };
+
+    return $loop->(@blocks);
+}
+
 sub flat_map {
     my ($self, $f) = @_;
     die "You should override this method.";
