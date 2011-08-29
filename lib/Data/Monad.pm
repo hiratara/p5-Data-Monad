@@ -30,8 +30,18 @@ sub for {
 
     my $loop; $loop = sub {
         my @blocks = @_;
-        my $m = (shift @blocks)->();
-        my $ref = shift @blocks unless ref $blocks[0] eq 'CODE';
+        my $block = shift @blocks;
+
+        my $should_yield;
+        if (! ref $block and $block eq 'yield') {
+            $should_yield = $block;
+            $block = shift @blocks;
+        }
+
+        my $m = $block->();
+        $m = $class->unit($m) if $should_yield;
+
+        my $ref = shift @blocks if ref($blocks[0]) =~ /^(ARRAY|SCALAR)$/;
 
         if (@blocks) {
             return $m->flat_map(sub {
