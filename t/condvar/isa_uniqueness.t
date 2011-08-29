@@ -9,9 +9,12 @@ sub is_unique(@) {
     return 1;
 }
 
-require Data::Monad::CondVar;
-delete $INC{"Data/Monad/CondVar.pm"};
-require Data::Monad::CondVar;
+{
+    local $SIG{__WARN__} = sub {}; # suppress worning
+    require Data::Monad::CondVar;
+    delete $INC{"Data/Monad/CondVar.pm"};
+    require Data::Monad::CondVar;
+}
 
 ok is_unique @AnyEvent::CondVar::ISA;
 
