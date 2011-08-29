@@ -35,7 +35,10 @@ use AnyEvent ();
 
 # extends AE::cv directly
 require Data::Monad;
-push @AnyEvent::CondVar::ISA, __PACKAGE__, 'Data::Monad';
+for my $mixin (__PACKAGE__, 'Data::Monad') {
+    next if grep { $_ eq $mixin } @AnyEvent::CondVar::ISA;
+    push @AnyEvent::CondVar::ISA, $mixin;
+}
 
 sub unit {
     my ($class, @v) = @_;
