@@ -2,7 +2,7 @@ package Data::Monad::List;
 use strict;
 use warnings;
 use Exporter qw/import/;
-use base qw/Data::Monad/;
+use base qw/Data::MonadZero/;
 
 our @EXPORT = qw/list/;
 
@@ -15,6 +15,8 @@ sub unit {
 
     return list [$v];
 }
+
+sub zero { list [] }
 
 sub flat_map {
     my ($self, $f) = @_;

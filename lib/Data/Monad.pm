@@ -42,6 +42,15 @@ sub for {
 
         my $ref = shift @blocks if ref($blocks[0]) =~ /^(ARRAY|SCALAR)$/;
 
+        if (! ref $blocks[0] and ($blocks[0] || '') eq 'if') {
+            shift @blocks; # skip 'if'
+            my $predicate = shift @blocks;
+            $m = $m->filter(sub {
+                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = shift);
+                $predicate->();
+            });
+        }
+
         if (@blocks) {
             return $m->flat_map(sub {
                 # capture values for nested blocks.

@@ -17,4 +17,13 @@ ok eq_set(Data::Monad::List->for(
     yield => sub { "$x-$y" },
 ), ["1-3", "2-3", "1-4", "2-4", "1-5", "2-5"]);
 
+
+ok eq_set(Data::Monad::List->for(
+    sub { list [1, 2] }   => \$x,
+    sub { list [3, 4, 5] } => \$y,
+        if => sub { ($x + $y) % 2 == 0 },
+    yield => sub { "$x-$y" },
+), ["1-3", "2-4", "1-5"]);
+
+
 done_testing;
