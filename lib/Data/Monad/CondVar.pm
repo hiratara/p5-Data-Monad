@@ -34,17 +34,25 @@ use Scalar::Util ();
 use AnyEvent ();
 
 # extends AE::cv directly
-require Data::Monad;
-for my $mixin (__PACKAGE__, 'Data::Monad') {
+require Data::MonadZero;
+for my $mixin (__PACKAGE__, 'Data::MonadZero') {
     next if grep { $_ eq $mixin } @AnyEvent::CondVar::ISA;
     push @AnyEvent::CondVar::ISA, $mixin;
 }
+
+our $ZERO = "[ZERO of ${\ __PACKAGE__}]";
 
 sub unit {
     my ($class, @v) = @_;
 
     my $cv = AE::cv;
     $cv->send(@v);
+    return $cv;
+}
+
+sub zero {
+    my $class = shift;
+    (my $cv = AE::cv)->croak($ZERO);
     return $cv;
 }
 
@@ -65,6 +73,27 @@ sub flat_map {
     });
 
     return $cv_bound;
+}
+
+sub or {
+    my ($self, $alter) = @_;
+
+    my $cv_mixed = AE::cv;
+    $self->cb(sub {
+        my @v = eval { $_[0]->recv };
+        unless ($@) {
+            $cv_mixed->(@v);
+        } elsif ($@ =~ /\Q$ZERO\E/) {
+            $alter->cb(sub {
+                my @v = eval { $_[0]->recv };
+                $@ ? $cv_mixed->croak($@) : $cv_mixed->(@v);
+            });
+        } else {
+            $cv_mixed->croak($@);
+        }
+    });
+
+    $cv_mixed;
 }
 
 1;
