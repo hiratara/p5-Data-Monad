@@ -32,14 +32,13 @@ sub for {
         my @blocks = @_;
         my $block = shift @blocks;
 
-        my $should_yield;
+        my $m;
         if (! ref $block and $block eq 'yield') {
-            $should_yield = $block;
             $block = shift @blocks;
+            $m = $class->unit($block->());
+        } else {
+            $m = $block->();
         }
-
-        my $m = $block->();
-        $m = $class->unit($m) if $should_yield;
 
         my $ref = shift @blocks if ref($blocks[0]) =~ /^(ARRAY|SCALAR)$/;
 

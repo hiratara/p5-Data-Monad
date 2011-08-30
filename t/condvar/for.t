@@ -24,7 +24,7 @@ is_deeply [AnyEvent::CondVar->for(
     sub { cv 1, 2, 3 } => \@x,
     sub { cv map {$_ + 1} @x } => \@y,
     sub { cv map {$_ - 1} @x } => \@z,
-    sub { AnyEvent::CondVar->unit(@y, @z) },
+    yield => sub { @y, @z },
 )->recv], [2, 3, 4, 0, 1, 2];
 
 done_testing;
