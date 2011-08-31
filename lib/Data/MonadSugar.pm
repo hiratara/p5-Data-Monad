@@ -10,6 +10,11 @@ sub pick($;$)  { $_PICK->(@_)    }
 sub satisfy(&) { $_SATISFY->(@_) }
 sub yield(&)   { $_YIELD->(@_)   }
 
+sub _capture {
+    my $ref = pop;
+    ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
+}
+
 sub for(&) {
     my $code = shift;
 
@@ -45,20 +50,19 @@ sub for(&) {
 
         if ($info->{satisfy}) {
             $m = $m->filter(sub {
-                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
+                _capture @_ => $ref;
                 $info->{satisfy}->(@_);
             });
         }
 
         if ($info->{yield}) {
             return $m->map(sub {
-                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
+                _capture @_ => $ref;
                 $info->{yield}->();
             });
         } elsif (@blocks) {
             return $m->flat_map(sub {
-                # capture values for nested blocks.
-                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
+                _capture @_ => $ref;
                 $loop->(@blocks);
             });
         } else {
