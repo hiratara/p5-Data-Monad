@@ -30,9 +30,13 @@ ok eq_set(Data::MonadSugar::for {
     let \my $m2 => sub { list [$x, $x + 1, $x + 2] };
     let \my $m3 => sub { list [ 'dummy' ] };
     pick \my $y => sub { $m2 };
+    let \my $m4 => sub { list [ "dummy2" ] };
     satisfy { ($x + $y) % 2 == 0 };
-    yield { "$x-$y" };
-}, ["1-1", "1-3", "2-2", "2-4"]);
+    let \my $m5 => sub { list [ "$x-$y" ] };
+    satisfy { $y <= 3 };
+    pick \my $result => sub { $m5 };
+    yield { $result };
+}, ["1-1", "1-3", "2-2"]);
 
 
 done_testing;

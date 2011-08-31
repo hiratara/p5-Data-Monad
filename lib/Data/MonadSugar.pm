@@ -14,6 +14,15 @@ sub let($$)    { $_LET->(@_)     }
 
 sub _capture {
     my $ref = pop;
+
+    # XXX special pattern. Capture multiple values.
+    if (ref $ref eq 'HASH') {
+        for my $k (keys %$ref) {
+            _capture(@{$_[0]->{$k}} => $ref->{$k});
+        }
+        return;
+    }
+
     ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
 }
 
@@ -37,14 +46,40 @@ sub for(&) {
 
         local $_SATISFY = sub {
             my $predicate = shift;
+            die "satisfy() should be called after pick()." unless @blocks;
 
-            $blocks[$#blocks]->{satisfy} = $predicate;
+            my $orig_block = $blocks[$#blocks]->{block};
+            my $orig_ref   = $blocks[$#blocks]->{ref};
+            $blocks[$#blocks]->{block} = sub {
+                $orig_block->()->filter(sub {
+                    _capture @_ => $orig_ref;
+                    $predicate->(@_);
+                });
+            };
         };
 
         local $_LET = sub {
             my ($ref, $block) = @_;
 
-            push @blocks, {ref => $ref, block => $block, is_let => 1};
+            unless (@blocks) {
+                # eval immediately because we aren't in any lambdas.
+                _capture $block->() => $ref;
+                return;
+            }
+
+            my $orig_block = $blocks[$#blocks]->{block};
+            my $orig_ref   = $blocks[$#blocks]->{ref};
+
+            # XXX Special pattern. Capture multiple values.
+            #     A tupple is used in "p <- e; p' = e'" pattern.
+            #     See: http://www.scala-lang.org/docu/files/ScalaReference.pdf
+            $blocks[$#blocks]->{ref} = {ref => $orig_ref, let => $ref};
+            $blocks[$#blocks]->{block} = sub {
+                $orig_block->()->map(sub {
+                    _capture @_ => $orig_ref;
+                    return {ref => [@_], let => [$block->()]};
+                });
+            };
         };
         $code->();
     }
@@ -55,18 +90,6 @@ sub for(&) {
         my $info = shift @blocks;
         my $m = $info->{block}->();
         my $ref = $info->{ref};
-
-        if ($info->{is_let}) {
-            _capture $m => $ref;
-            return $loop->(@blocks);
-        }
-
-        if ($info->{satisfy}) {
-            $m = $m->filter(sub {
-                _capture @_ => $ref;
-                $info->{satisfy}->(@_);
-            });
-        }
 
         if ($info->{yield}) {
             return $m->map(sub {
