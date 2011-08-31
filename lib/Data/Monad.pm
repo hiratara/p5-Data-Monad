@@ -15,10 +15,11 @@ sub lift {
         my @ms = @_;
 
         Data::MonadSugar::for {
-            my @args = (undef) x @ms;
+            my @args;
             for my $i (0 .. $#ms) {
                 # capture each value in each slot of @args
-                pick +($args[$i] = []) => sub { $ms[$i] };
+                pick +(my $slot = []) => sub { $ms[$i] };
+                push @args, $slot;
             }
             yield { $f->(map { @$_ } @args) };
         };
