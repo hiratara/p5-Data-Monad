@@ -3,12 +3,14 @@ use strict;
 use warnings;
 use Exporter qw/import/;
 
-our @EXPORT = qw/pick satisfy yield/;
+our @EXPORT = qw/pick satisfy yield let/;
 
-our $_PICK = our $_SATISFY = our $_YIELD = sub { die "called outside for()." };
+our $_PICK = our $_SATISFY = 
+    our $_YIELD = our $_LET = sub { die "called outside for()." };
 sub pick($;$)  { $_PICK->(@_)    }
 sub satisfy(&) { $_SATISFY->(@_) }
 sub yield(&)   { $_YIELD->(@_)   }
+sub let($$)    { $_LET->(@_)     }
 
 sub _capture {
     my $ref = pop;
@@ -38,6 +40,12 @@ sub for(&) {
 
             $blocks[$#blocks]->{satisfy} = $predicate;
         };
+
+        local $_LET = sub {
+            my ($ref, $block) = @_;
+
+            push @blocks, {ref => $ref, block => $block, is_let => 1};
+        };
         $code->();
     }
 
@@ -47,6 +55,11 @@ sub for(&) {
         my $info = shift @blocks;
         my $m = $info->{block}->();
         my $ref = $info->{ref};
+
+        if ($info->{is_let}) {
+            _capture $m => $ref;
+            return $loop->(@blocks);
+        }
 
         if ($info->{satisfy}) {
             $m = $m->filter(sub {

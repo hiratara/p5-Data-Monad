@@ -26,4 +26,12 @@ is_deeply [Data::MonadSugar::for {
     yield { @y, @z };
 }->recv], [2, 3, 4, 0, 1, 2];
 
+is Data::MonadSugar::for {
+    pick \my $x => sub { cv 10 / 2 };
+    let \my $m => sub { AnyEvent::CondVar->unit($x + 1) };
+    pick \my $y => sub { $m };
+    pick \my $z => sub { AnyEvent::CondVar->unit($x - 1) };
+    pick sub { AnyEvent::CondVar->unit($y * $z) };
+}->recv, 24;
+
 done_testing;
