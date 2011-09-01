@@ -1,6 +1,7 @@
 package Data::Monad;
 use strict;
 use warnings;
+use Data::MonadSugar;
 
 sub unit {
     my ($class, @v) = @_;
@@ -12,57 +13,17 @@ sub lift {
 
     sub {
         my @ms = @_;
-        my @args = (undef) x @ms;
 
-        $class->for(
-            (map {
-                my $i = $_;
+        Data::MonadSugar::for {
+            my @args;
+            for my $i (0 .. $#ms) {
                 # capture each value in each slot of @args
-                sub { $ms[$i] } => ($args[$i] = []);
-            } 0 .. $#ms),
-            sub { $class->unit($f->(map { @$_ } @args)) }
-        );
+                pick +(my $slot = []) => sub { $ms[$i] };
+                push @args, $slot;
+            }
+            yield { $f->(map { @$_ } @args) };
+        };
     };
-}
-
-sub for {
-    my ($class, @blocks) = @_;
-
-    my $loop; $loop = sub {
-        my @blocks = @_;
-        my $block = shift @blocks;
-
-        my $m;
-        if (! ref $block and $block eq 'yield') {
-            $block = shift @blocks;
-            $m = $class->unit($block->());
-        } else {
-            $m = $block->();
-        }
-
-        my $ref = shift @blocks if ref($blocks[0]) =~ /^(ARRAY|SCALAR)$/;
-
-        if (! ref $blocks[0] and ($blocks[0] || '') eq 'if') {
-            shift @blocks; # skip 'if'
-            my $predicate = shift @blocks;
-            $m = $m->filter(sub {
-                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = shift);
-                $predicate->();
-            });
-        }
-
-        if (@blocks) {
-            return $m->flat_map(sub {
-                # capture values for nested blocks.
-                ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = shift);
-                $loop->(@blocks)
-            });
-        } else {
-            return $m;
-        }
-    };
-
-    return $loop->(@blocks);
 }
 
 sub flat_map {

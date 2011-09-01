@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use AnyEvent;
 use Data::Monad::CondVar;
+use Data::MonadSugar;
 use Test::More;
 
 sub cv {
@@ -11,20 +12,26 @@ sub cv {
     return $cv;
 }
 
-my ($x, $y, $z);
-is +AnyEvent::CondVar->for(
-    sub { cv 10 / 2 }   => \$x,
-    sub { AnyEvent::CondVar->unit($x + 1) } => \$y,
-    sub { AnyEvent::CondVar->unit($x - 1) } => \$z,
-    sub { AnyEvent::CondVar->unit($y * $z) },
-)->recv, 24;
+is Data::MonadSugar::for {
+    pick \my $x => sub { cv 10 / 2 };
+    pick \my $y => sub { AnyEvent::CondVar->unit($x + 1) };
+    pick \my $z => sub { AnyEvent::CondVar->unit($x - 1) };
+    pick sub { AnyEvent::CondVar->unit($y * $z) };
+}->recv, 24;
 
-my (@x, @y, @z);
-is_deeply [AnyEvent::CondVar->for(
-    sub { cv 1, 2, 3 } => \@x,
-    sub { cv map {$_ + 1} @x } => \@y,
-    sub { cv map {$_ - 1} @x } => \@z,
-    yield => sub { @y, @z },
-)->recv], [2, 3, 4, 0, 1, 2];
+is_deeply [Data::MonadSugar::for {
+    pick \my @x => sub { cv 1, 2, 3 };
+    pick \my @y => sub { cv map {$_ + 1} @x };
+    pick \my @z => sub { cv map {$_ - 1} @x };
+    yield { @y, @z };
+}->recv], [2, 3, 4, 0, 1, 2];
+
+is Data::MonadSugar::for {
+    pick \my $x => sub { cv 10 / 2 };
+    let \my $m => sub { AnyEvent::CondVar->unit($x + 1) };
+    pick \my $y => sub { $m };
+    pick \my $z => sub { AnyEvent::CondVar->unit($x - 1) };
+    pick sub { AnyEvent::CondVar->unit($y * $z) };
+}->recv, 24;
 
 done_testing;
