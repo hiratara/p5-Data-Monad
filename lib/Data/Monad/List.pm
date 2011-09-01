@@ -6,22 +6,14 @@ use base qw/Data::MonadZero/;
 
 our @EXPORT = qw/list/;
 
-sub list($) { __PACKAGE__->new(@_) }
+sub list($) { bless $_[0], __PACKAGE__ }
 
-sub new { bless $_[1], $_[0] }
+sub unit { bless [$_[1]], __PACKAGE__ }
 
-sub unit {
-    my ($class, $v) = @_;
-
-    return list [$v];
-}
-
-sub zero { list [] }
+sub zero { bless [], __PACKAGE__ }
 
 sub flat_map {
-    my ($self, $f) = @_;
-
-    list [map { @{$f->($_)} } @$self];
+    bless [map { @{$_[1]->($_)} } @{$_[0]}], __PACKAGE__;
 }
 
 1;

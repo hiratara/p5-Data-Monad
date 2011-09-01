@@ -114,16 +114,16 @@ __END__
 
 % perl -Ilib eg/bench.pl
               Rate   monad_99   recur_99 blessed_99  normal_99
-monad_99    1792/s         --       -83%       -89%       -90%
-recur_99   10638/s       494%         --       -33%       -43%
-blessed_99 15873/s       786%        49%         --       -14%
-normal_99  18519/s       933%        74%        17%         --
+monad_99    2212/s         --       -79%       -86%       -87%
+recur_99   10638/s       381%         --       -32%       -39%
+blessed_99 15625/s       606%        47%         --       -11%
+normal_99  17544/s       693%        65%        12%         --
               Rate   monad_99 c_recur_99 b_recur_99   recur_99
-monad_99    1776/s         --       -70%       -81%       -83%
-c_recur_99  5882/s       231%         --       -38%       -45%
-b_recur_99  9434/s       431%        60%         --       -12%
-recur_99   10753/s       505%        83%        14%         --
+monad_99    2193/s         --       -60%       -77%       -80%
+c_recur_99  5525/s       152%         --       -41%       -50%
+b_recur_99  9346/s       326%        69%         --       -15%
+recur_99   10989/s       401%        99%        18%         --
                Rate     monad_99 c_recur_2_99   c_recur_99
-monad_99     1802/s           --         -66%         -69%
-c_recur_2_99 5348/s         197%           --          -7%
-c_recur_99   5747/s         219%           7%           --
+monad_99     2237/s           --         -58%         -61%
+c_recur_2_99 5376/s         140%           --          -6%
+c_recur_99   5714/s         155%           6%           --
