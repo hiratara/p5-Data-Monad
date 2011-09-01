@@ -1,6 +1,7 @@
 package Data::MonadSugar;
 use strict;
 use warnings;
+use Scalar::Util qw/blessed/;
 use Exporter qw/import/;
 
 our @EXPORT = qw/pick satisfy yield let/;
@@ -15,15 +16,18 @@ sub let($$)    { $_LET->(@_)     }
 sub _capture {
     my $ref = pop;
 
-    # XXX special pattern. Capture multiple values.
-    if (ref $ref eq 'HASH') {
-        for my $k (keys %$ref) {
-            _capture(@{$_[0]->{$k}} => $ref->{$k});
-        }
-        return;
-    }
+    return $ref->capture(@_) if blessed $ref && $ref->can('capture');
 
     ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
+}
+
+sub _tuple { bless [@_], 'Data::MonadSugar::Tuple' }
+sub Data::MonadSugar::Tuple::capture {
+    my ($self, $result) = @_;
+    blessed $result && $result->isa(ref $self)
+                                            or die "[BUG]result is not tuple";
+
+    _capture @{$result->[$_]} => $self->[$_] for 0 .. $#$self;
 }
 
 sub for(&) {
@@ -70,14 +74,14 @@ sub for(&) {
             my $orig_block = $blocks[$#blocks]->{block};
             my $orig_ref   = $blocks[$#blocks]->{ref};
 
-            # XXX Special pattern. Capture multiple values.
-            #     A tupple is used in "p <- e; p' = e'" pattern.
-            #     See: http://www.scala-lang.org/docu/files/ScalaReference.pdf
-            $blocks[$#blocks]->{ref} = {ref => $orig_ref, let => $ref};
+            # Capture multiple values.
+            # A tupple is used in "p <- e; p' = e'" pattern.
+            # See: http://www.scala-lang.org/docu/files/ScalaReference.pdf
+            $blocks[$#blocks]->{ref} = _tuple $orig_ref, $ref;
             $blocks[$#blocks]->{block} = sub {
                 $orig_block->()->map(sub {
                     _capture @_ => $orig_ref;
-                    return {ref => [@_], let => [$block->()]};
+                    return _tuple [@_], [$block->()];
                 });
             };
         };
