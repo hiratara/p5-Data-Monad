@@ -26,6 +26,11 @@ sub lift {
     };
 }
 
+sub sequence {
+    my $class = shift;
+    $class->lift(sub { \@_ })->(@_);
+}
+
 sub flat_map {
     my ($self, $f) = @_;
     die "You should override this method.";
