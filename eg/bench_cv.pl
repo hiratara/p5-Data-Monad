@@ -46,6 +46,11 @@ sub monad($$) {
     })->recv;
 }
 
+sub monad_lift($$) {
+    my ($cv1, $cv2) = @_;
+    AnyEvent::CondVar->lift(sub {$_[0] * $_[1]})->($cv1, $cv2)->recv;
+}
+
 sub monad_for($$) {
     my ($cv1, $cv2) = @_;
     Data::MonadSugar::for {
@@ -68,6 +73,7 @@ my $r = Benchmark::timethese($count => {
     bare_ae   => sub { bare_ae(cv 5, cv 4)   },
     monad_for => sub { monad_for(cv 5, cv 4) },
     monad     => sub { monad(cv 5, cv 4)     },
+    monad_lift=> sub { monad_lift(cv 5, cv 4)},
     coro      => sub { coro(cv 5, cv 4)      },
 });
 for my $v (values %$r) {
@@ -91,13 +97,15 @@ bare_ae   4361/s        6%        0%        --       -6%
 monad     4662/s       13%        7%        7%        --
 
 % perl -Ilib eg/bench_cv.pl 0 20000
-Benchmark: timing 20000 iterations of bare_ae, coro, monad, monad_for...
-   bare_ae: 0.919773 wallclock secs ( 0.88 usr +  0.04 sys =  0.92 CPU) @ 21739.13/s (n=20000)
-      coro: 0.965312 wallclock secs ( 0.92 usr +  0.04 sys =  0.96 CPU) @ 20833.33/s (n=20000)
-     monad: 1.36842 wallclock secs ( 1.33 usr +  0.04 sys =  1.37 CPU) @ 14598.54/s (n=20000)
- monad_for: 2.07753 wallclock secs ( 2.02 usr +  0.05 sys =  2.07 CPU) @ 9661.84/s (n=20000)
-             Rate monad_for     monad      coro   bare_ae
-monad_for  4813/s        --      -34%      -54%      -56%
-monad      7308/s       52%        --      -29%      -33%
-coro      10359/s      115%       42%        --       -5%
-bare_ae   10872/s      126%       49%        5%        --
+Benchmark: timing 20000 iterations of bare_ae, coro, monad, monad_for, monad_lift...
+   bare_ae: 0.967884 wallclock secs ( 0.93 usr +  0.04 sys =  0.97 CPU) @ 20618.56/s (n=20000)
+      coro: 0.967329 wallclock secs ( 0.93 usr +  0.04 sys =  0.97 CPU) @ 20618.56/s (n=20000)
+     monad: 1.34422 wallclock secs ( 1.30 usr +  0.04 sys =  1.34 CPU) @ 14925.37/s (n=20000)
+ monad_for: 2.04411 wallclock secs ( 1.99 usr +  0.05 sys =  2.04 CPU) @ 9803.92/s (n=20000)
+monad_lift: 2.2946 wallclock secs ( 2.24 usr +  0.06 sys =  2.30 CPU) @ 8695.65/s (n=20000)
+              Rate monad_lift  monad_for      monad    bare_ae       coro
+monad_lift  4358/s         --       -11%       -41%       -58%       -58%
+monad_for   4892/s        12%         --       -34%       -53%       -53%
+monad       7439/s        71%        52%         --       -28%       -28%
+bare_ae    10332/s       137%       111%        39%         --        -0%
+coro       10338/s       137%       111%        39%         0%         --
