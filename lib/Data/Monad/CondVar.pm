@@ -56,28 +56,28 @@ sub zero {
     return $cv;
 }
 
-# # Overridden (for performance)
-# sub lift {
-#     my ($class, $f) = @_;
+# Overridden (for performance)
+sub lift {
+    my ($class, $f) = @_;
 
-#     sub {
-#         my @values;
-#         my $cv = AE::cv;
-#         $cv->begin(sub { shift->send($f->(map {@$_} @values)) });
-#         for my $i (0 .. $#_) {
-#             $cv->begin;
-#             $_[$i]->cb(sub {
-#                 my @v = eval { $_[0]->recv };
-#                 $@ and return $cv->croak($@);
-#                 $values[$i] = \@v;
-#                 $cv->end;
-#             });
-#         }
-#         $cv->end;
+    sub {
+        my @values;
+        my $cv = AE::cv;
+        $cv->begin(sub { shift->send($f->(map {@$_} @values)) });
+        for my $i (0 .. $#_) {
+            $cv->begin;
+            $_[$i]->cb(sub {
+                my @v = eval { $_[0]->recv };
+                $@ and return $cv->croak($@);
+                $values[$i] = \@v;
+                $cv->end;
+            });
+        }
+        $cv->end;
 
-#         return $cv;
-#     };
-# }
+        return $cv;
+    };
+}
 
 sub flat_map {
     my ($self, $f) = @_;

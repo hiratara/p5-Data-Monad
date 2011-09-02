@@ -98,14 +98,14 @@ monad     4662/s       13%        7%        7%        --
 
 % perl -Ilib eg/bench_cv.pl 0 20000
 Benchmark: timing 20000 iterations of bare_ae, coro, monad, monad_for, monad_lift...
-   bare_ae: 0.967884 wallclock secs ( 0.93 usr +  0.04 sys =  0.97 CPU) @ 20618.56/s (n=20000)
-      coro: 0.967329 wallclock secs ( 0.93 usr +  0.04 sys =  0.97 CPU) @ 20618.56/s (n=20000)
-     monad: 1.34422 wallclock secs ( 1.30 usr +  0.04 sys =  1.34 CPU) @ 14925.37/s (n=20000)
- monad_for: 2.04411 wallclock secs ( 1.99 usr +  0.05 sys =  2.04 CPU) @ 9803.92/s (n=20000)
-monad_lift: 2.2946 wallclock secs ( 2.24 usr +  0.06 sys =  2.30 CPU) @ 8695.65/s (n=20000)
-              Rate monad_lift  monad_for      monad    bare_ae       coro
-monad_lift  4358/s         --       -11%       -41%       -58%       -58%
-monad_for   4892/s        12%         --       -34%       -53%       -53%
-monad       7439/s        71%        52%         --       -28%       -28%
-bare_ae    10332/s       137%       111%        39%         --        -0%
-coro       10338/s       137%       111%        39%         0%         --
+   bare_ae: 0.980902 wallclock secs ( 0.94 usr +  0.04 sys =  0.98 CPU) @ 20408.16/s (n=20000)
+      coro: 0.970281 wallclock secs ( 0.93 usr +  0.04 sys =  0.97 CPU) @ 20618.56/s (n=20000)
+     monad: 1.33999 wallclock secs ( 1.30 usr +  0.05 sys =  1.35 CPU) @ 14814.81/s (n=20000)
+ monad_for: 2.14951 wallclock secs ( 2.09 usr +  0.06 sys =  2.15 CPU) @ 9302.33/s (n=20000)
+monad_lift: 1.38826 wallclock secs ( 1.34 usr +  0.04 sys =  1.38 CPU) @ 14492.75/s (n=20000)
+              Rate  monad_for monad_lift      monad    bare_ae       coro
+monad_for   4652/s         --       -35%       -38%       -54%       -55%
+monad_lift  7203/s        55%         --        -3%       -29%       -30%
+monad       7463/s        60%         4%         --       -27%       -28%
+bare_ae    10195/s       119%        42%        37%         --        -1%
+coro       10306/s       122%        43%        38%         1%         --
