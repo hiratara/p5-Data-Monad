@@ -92,12 +92,12 @@ monad     4662/s       13%        7%        7%        --
 
 % perl -Ilib eg/bench_cv.pl 0 20000
 Benchmark: timing 20000 iterations of bare_ae, coro, monad, monad_for...
-   bare_ae: 0.982566 wallclock secs ( 0.94 usr +  0.04 sys =  0.98 CPU) @ 20408.16/s (n=20000)
-      coro: 0.946208 wallclock secs ( 0.90 usr +  0.04 sys =  0.94 CPU) @ 21276.60/s (n=20000)
-     monad: 1.64958 wallclock secs ( 1.60 usr +  0.05 sys =  1.65 CPU) @ 12121.21/s (n=20000)
- monad_for: 2.42338 wallclock secs ( 2.36 usr +  0.06 sys =  2.42 CPU) @ 8264.46/s (n=20000)
-             Rate monad_for     monad   bare_ae      coro
-monad_for  4126/s        --      -32%      -59%      -61%
-monad      6062/s       47%        --      -40%      -43%
-bare_ae   10177/s      147%       68%        --       -4%
-coro      10568/s      156%       74%        4%        --
+   bare_ae: 0.919773 wallclock secs ( 0.88 usr +  0.04 sys =  0.92 CPU) @ 21739.13/s (n=20000)
+      coro: 0.965312 wallclock secs ( 0.92 usr +  0.04 sys =  0.96 CPU) @ 20833.33/s (n=20000)
+     monad: 1.36842 wallclock secs ( 1.33 usr +  0.04 sys =  1.37 CPU) @ 14598.54/s (n=20000)
+ monad_for: 2.07753 wallclock secs ( 2.02 usr +  0.05 sys =  2.07 CPU) @ 9661.84/s (n=20000)
+             Rate monad_for     monad      coro   bare_ae
+monad_for  4813/s        --      -34%      -54%      -56%
+monad      7308/s       52%        --      -29%      -33%
+coro      10359/s      115%       42%        --       -5%
+bare_ae   10872/s      126%       49%        5%        --

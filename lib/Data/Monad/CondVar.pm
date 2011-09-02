@@ -75,6 +75,19 @@ sub flat_map {
     return $cv_bound;
 }
 
+# Overridden (for performance)
+sub map {
+    my ($self, $f) = @_;
+
+    my $done = AE::cv;
+    $self->cb(sub {
+        my @v = eval { $f->($_[0]->recv) };
+        $@ ? $done->croak($@) : $done->send(@v);
+    });
+
+    return $done;
+}
+
 sub or {
     my ($self, $alter) = @_;
 
