@@ -48,4 +48,6 @@ sub flatten {
     $self_duplexed->flat_map(sub { @_ });
 }
 
+sub ap { (ref $_[0])->lift(sub { my $c = shift; $c->(@_) })->(@_) }
+
 1;
