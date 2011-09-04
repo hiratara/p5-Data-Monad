@@ -19,7 +19,7 @@ my $list = Data::Monad::List->sequence(
 );
 
 ok eq_sets(
-    [$list->scalars],
+    $list,
     [[1, 3, 4], [1 ,3, 5], [1, 3, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6]]
 );
 

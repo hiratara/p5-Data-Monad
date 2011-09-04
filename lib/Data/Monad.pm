@@ -28,7 +28,7 @@ sub lift {
 
 sub sequence {
     my $class = shift;
-    $class->lift(sub { \@_ })->(@_);
+    $class->lift(sub { @_ })->(@_);
 }
 
 sub flat_map {
