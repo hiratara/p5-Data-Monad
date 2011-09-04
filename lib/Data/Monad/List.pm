@@ -4,16 +4,36 @@ use warnings;
 use Exporter qw/import/;
 use base qw/Data::MonadZero/;
 
-our @EXPORT = qw/list/;
+our @EXPORT = qw/scalar_list/;
 
-sub list($) { bless $_[0], __PACKAGE__ }
+sub scalar_list(@) { __PACKAGE__->new(map { [$_] } @_) }
 
-sub unit { bless [$_[1]], __PACKAGE__ }
+sub new {
+    my $class = shift;
+    bless [@_], $class;
+}
 
-sub zero { bless [], __PACKAGE__ }
+sub unit {
+    my $class = shift;
+    $class->new([@_]);
+}
+
+sub zero {
+    my $class = shift;
+    $class->new();
+}
 
 sub flat_map {
-    bless [map { @{$_[1]->($_)} } @{$_[0]}], __PACKAGE__;
+    my ($self, $f) = @_;
+    (ref $self)->new(map { @{$f->(@$_)} } @$self);
+}
+
+sub scalars {
+    my $self = shift;
+    map {
+        @$_ == 1 or die "contained multiple values.";
+        @$_;
+    } @$self;
 }
 
 1;

@@ -14,10 +14,12 @@ sub eq_sets($$) {
     return 1;
 }
 
-my $list = Data::Monad::List->sequence(list [1, 2], list [3], list [4, 5, 6]);
+my $list = Data::Monad::List->sequence(
+    scalar_list(1, 2), scalar_list(3), scalar_list(4, 5, 6)
+);
 
 ok eq_sets(
-    $list,
+    [$list->scalars],
     [[1, 3, 4], [1 ,3, 5], [1, 3, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6]]
 );
 

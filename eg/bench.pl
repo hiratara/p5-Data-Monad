@@ -84,9 +84,9 @@ sub blessed_recursive_99 {
 
 sub monad_99 {
     return Data::MonadSugar::for {
-        pick \my $x, sub { list [1 .. 9] };
-        pick \my $y, sub { list [1 .. 9] };
-        yield { [$x, $y => $x * $y] }
+        pick \my $x, sub { scalar_list(1 .. 9) };
+        pick \my $y, sub { scalar_list(1 .. 9) };
+        yield { $x, $y => $x * $y }
     };
 }
 
@@ -114,16 +114,16 @@ __END__
 
 % perl -Ilib eg/bench.pl
               Rate   monad_99   recur_99 blessed_99  normal_99
-monad_99    2212/s         --       -79%       -86%       -87%
-recur_99   10638/s       381%         --       -32%       -39%
-blessed_99 15625/s       606%        47%         --       -11%
-normal_99  17544/s       693%        65%        12%         --
+monad_99    1721/s         --       -84%       -90%       -91%
+recur_99   10989/s       538%         --       -33%       -40%
+blessed_99 16393/s       852%        49%         --       -10%
+normal_99  18182/s       956%        65%        11%         --
               Rate   monad_99 c_recur_99 b_recur_99   recur_99
-monad_99    2193/s         --       -60%       -77%       -80%
-c_recur_99  5525/s       152%         --       -41%       -50%
-b_recur_99  9346/s       326%        69%         --       -15%
-recur_99   10989/s       401%        99%        18%         --
+monad_99    1802/s         --       -71%       -81%       -84%
+c_recur_99  6135/s       240%         --       -37%       -47%
+b_recur_99  9709/s       439%        58%         --       -16%
+recur_99   11494/s       538%        87%        18%         --
                Rate     monad_99 c_recur_2_99   c_recur_99
-monad_99     2237/s           --         -58%         -61%
-c_recur_2_99 5376/s         140%           --          -6%
-c_recur_99   5714/s         155%           6%           --
+monad_99     1832/s           --         -66%         -70%
+c_recur_2_99 5405/s         195%           --         -12%
+c_recur_99   6135/s         235%          13%           --
