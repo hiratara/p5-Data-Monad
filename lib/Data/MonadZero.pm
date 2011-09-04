@@ -10,7 +10,9 @@ sub zero {
 
 sub filter {
     my ($self, $predicate) = @_;
-    $self->flat_map(sub { $predicate->(@_) ? $self->unit(@_) : $self->zero });
+    $self->flat_map(sub {
+        $predicate->(@_) ? (ref $self)->unit(@_) : (ref $self)->zero;
+    });
 }
 
 1;
