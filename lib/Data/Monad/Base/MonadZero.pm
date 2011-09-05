@@ -1,7 +1,7 @@
-package Data::MonadZero;
+package Data::Monad::Base::MonadZero;
 use strict;
 use warnings;
-use parent qw/Data::Monad/;
+use parent qw/Data::Monad::Base::Monad/;
 
 sub zero {
     my $class = shift;

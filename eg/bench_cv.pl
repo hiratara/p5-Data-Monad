@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Monad::CondVar;
-use Data::MonadSugar;
+use Data::Monad::Base::Sugar;
 use AnyEvent;
 use Coro;
 use Coro::AnyEvent;
@@ -53,7 +53,7 @@ sub monad_lift($$) {
 
 sub monad_for($$) {
     my ($cv1, $cv2) = @_;
-    Data::MonadSugar::for {
+    Data::Monad::Base::Sugar::for {
         pick \my $x => sub { $cv1 };
         pick \my $y => sub { $cv2 };
         yield {$x * $y};

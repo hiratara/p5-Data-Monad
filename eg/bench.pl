@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Monad::List;
-use Data::MonadSugar;
+use Data::Monad::Base::Sugar;
 use Benchmark;
 
 sub normal_99 {
@@ -83,7 +83,7 @@ sub blessed_recursive_99 {
 }
 
 sub monad_99 {
-    return Data::MonadSugar::for {
+    return Data::Monad::Base::Sugar::for {
         pick \my $x, sub { scalar_list(1 .. 9) };
         pick \my $y, sub { scalar_list(1 .. 9) };
         yield { $x, $y => $x * $y }

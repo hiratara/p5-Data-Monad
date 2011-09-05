@@ -1,4 +1,4 @@
-package Data::MonadSugar;
+package Data::Monad::Base::Sugar;
 use strict;
 use warnings;
 use Scalar::Util qw/blessed/;
@@ -21,8 +21,8 @@ sub _capture {
     ref $ref eq 'ARRAY' ? (@$ref = @_) : ($$ref = $_[0]);
 }
 
-sub _tuple { bless [@_], 'Data::MonadSugar::Tuple' }
-sub Data::MonadSugar::Tuple::capture {
+sub _tuple { bless [@_], 'Data::Monad::Base::Sugar::Tuple' }
+sub Data::Monad::Base::Sugar::Tuple::capture {
     my ($self, $result) = @_;
     blessed $result && $result->isa(ref $self)
                                             or die "[BUG]result is not tuple";

@@ -2,7 +2,7 @@ package Data::Monad::List;
 use strict;
 use warnings;
 use Exporter qw/import/;
-use base qw/Data::MonadZero/;
+use base qw/Data::Monad::Base::MonadZero/;
 
 our @EXPORT = qw/scalar_list/;
 

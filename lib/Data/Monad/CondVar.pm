@@ -34,8 +34,8 @@ use Scalar::Util ();
 use AnyEvent ();
 
 # extends AE::cv directly
-require Data::MonadZero;
-for my $mixin (__PACKAGE__, 'Data::MonadZero') {
+require Data::Monad::Base::MonadZero;
+for my $mixin (__PACKAGE__, 'Data::Monad::Base::MonadZero') {
     next if grep { $_ eq $mixin } @AnyEvent::CondVar::ISA;
     push @AnyEvent::CondVar::ISA, $mixin;
 }
