@@ -57,11 +57,13 @@ sub unit {
     return $cv;
 }
 
-sub zero {
+sub fail {
     my $class = shift;
-    (my $cv = AE::cv)->croak($ZERO);
+    (my $cv = AE::cv)->croak(@_);
     return $cv;
 }
+
+sub zero { $_[0]->fail($ZERO) }
 
 sub flat_map {
     my ($self, $f) = @_;
