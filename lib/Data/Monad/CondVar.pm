@@ -6,12 +6,18 @@ use Exporter qw/import/;
 
 our @EXPORT = qw/call_cc/;
 
+sub _assert_cv($) {
+    $_[0]->ready and die "[BUG]It already has been ready";
+    $_[0];
+}
+
 sub call_cc(&) {
     my $f = shift;
     my $ret_cv = AE::cv;
 
     my $skip = sub {
         my @v = @_;
+        _assert_cv $ret_cv;
         $ret_cv->send(@v);
 
         return AE::cv; # nop
@@ -19,6 +25,7 @@ sub call_cc(&) {
 
     $f->($skip)->cb(sub {
         my @v = eval { $_[0]->recv };
+        _assert_cv $ret_cv;
         $@ ? $ret_cv->croak($@) : $ret_cv->send(@v);
     });
 
@@ -42,6 +49,8 @@ for my $mixin (__PACKAGE__, 'Data::Monad::Base::MonadZero') {
 
 our $ZERO = "[ZERO of ${\ __PACKAGE__}]";
 
+*_assert_cv = \&Data::Monad::CondVar::_assert_cv;
+
 sub unit {
     my $class = shift;
     (my $cv = AE::cv)->send(@_);
@@ -61,11 +70,12 @@ sub flat_map {
     $self->cb(sub {
         my ($cv) = eval { $f->($_[0]->recv) };
         if ($@) {
-            $cv_bound->croak($@);
-            return
+            _assert_cv $cv_bound;
+            return $cv_bound->croak($@);
         }
         $cv->cb(sub {
             my @v = eval { $_[0]->recv };
+            _assert_cv $cv_bound;
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
         });
     });
@@ -84,9 +94,11 @@ sub or {
         } elsif ($@ =~ /\Q$ZERO\E/) {
             $alter->cb(sub {
                 my @v = eval { $_[0]->recv };
+                _assert_cv $cv_mixed;
                 $@ ? $cv_mixed->croak($@) : $cv_mixed->(@v);
             });
         } else {
+            _assert_cv $cv_mixed;
             $cv_mixed->croak($@);
         }
     });
@@ -103,10 +115,11 @@ sub catch {
         my $exception = $@ or return $result_cv->(@v);
 
         my $cv = eval { $f->($exception) };
-        $@ and return $result_cv->croak($@);
+        $@ and return (_assert_cv $result_cv)->croak($@);
 
         $cv->cb(sub {
             my @v = eval { $_[0]->recv };
+            _assert_cv $result_cv;
             $@ ? $result_cv->croak($@) : $result_cv->send(@v);
         });
     });
