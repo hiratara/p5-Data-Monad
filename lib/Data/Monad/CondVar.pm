@@ -137,4 +137,24 @@ sub sleep {
     });
 }
 
+sub timeout {
+    my ($self, $sec) = @_;
+
+    my $cv = AE::cv;
+    my $timeout_timer = AE::timer $sec, 0, sub {
+        # XXX Seems that AE::timer pass some arguments. Ignore them.
+        _assert_cv $cv;
+        $cv->();
+        undef $cv;
+    };
+
+    $self->map(sub {
+        $cv and (_assert_cv $cv)->(@_);
+        undef $timeout_timer;
+        return;  # void
+    });
+
+    return $cv;
+}
+
 1;
