@@ -114,4 +114,14 @@ sub catch {
     return $result_cv;
 }
 
+sub sleep {
+    my ($self, $sec) = @_;
+    $self->flat_map(sub {
+        my @v = @_;
+        my $cv = AE::cv;
+        my $t; $t = AE::timer $sec, 0, sub { $cv->(@v); undef $t};
+        return $cv;
+    });
+}
+
 1;
