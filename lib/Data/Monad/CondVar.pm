@@ -43,10 +43,8 @@ for my $mixin (__PACKAGE__, 'Data::Monad::Base::MonadZero') {
 our $ZERO = "[ZERO of ${\ __PACKAGE__}]";
 
 sub unit {
-    my ($class, @v) = @_;
-
-    my $cv = AE::cv;
-    $cv->send(@v);
+    my $class = shift;
+    (my $cv = AE::cv)->send(@_);
     return $cv;
 }
 
