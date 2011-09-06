@@ -96,4 +96,24 @@ sub or {
     $cv_mixed;
 }
 
+sub catch {
+    my ($self, $f) = @_;
+
+    my $result_cv = AE::cv;
+    $self->cb(sub {
+        my @v = eval { $_[0]->recv };
+        my $exception = $@ or return $result_cv->(@v);
+
+        my $cv = eval { $f->($exception) };
+        $@ and return $result_cv->croak($@);
+
+        $cv->cb(sub {
+            my @v = eval { $_[0]->recv };
+            $@ ? $result_cv->croak($@) : $result_cv->send(@v);
+        });
+    });
+
+    return $result_cv;
+}
+
 1;
