@@ -71,12 +71,31 @@ sub fail {
 
 sub zero { $_[0]->fail($ZERO) }
 
+sub cancel {
+    my $self = shift;
+    $self->ready and return;
+
+    my $canceler = delete $self->{_monad_canceler};
+    $canceler and $canceler->();
+
+    # $canceler may change this cv's status, so check the status again.
+    $self->ready or $self->croak("canceled");
+}
+
+sub canceler {
+    my $cv = shift;
+    @_ and $cv->{_monad_canceler} = shift;
+    $cv->{_monad_canceler};
+}
+
 sub flat_map {
     my ($self, $f) = @_;
 
     my $cv_bound = AE::cv;
+    my $cv_current = $self;
     $self->cb(sub {
-        my ($cv) = eval { $f->($_[0]->recv) };
+        my ($cv) = ($cv_current) = eval { $f->($_[0]->recv) };
+
         if ($@) {
             _assert_cv $cv_bound;
             return $cv_bound->croak($@);
@@ -87,6 +106,7 @@ sub flat_map {
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
         });
     });
+    $cv_bound->canceler(sub { $cv_current->cancel });
 
     return $cv_bound;
 }
@@ -140,7 +160,8 @@ sub sleep {
     $self->flat_map(sub {
         my @v = @_;
         my $cv = AE::cv;
-        my $t; $t = AE::timer $sec, 0, sub { $cv->(@v); undef $t};
+        my $t; $t = AE::timer $sec, 0, sub { $cv->(@v) };
+        $cv->canceler(sub { undef $t });
         return $cv;
     });
 }
