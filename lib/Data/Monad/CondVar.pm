@@ -78,8 +78,8 @@ sub cancel {
     my $canceler = delete $self->{_monad_canceler};
     $canceler and $canceler->();
 
-    # $canceler may change this cv's status, so check the status again.
-    $self->ready or $self->croak("canceled");
+    _assert_cv $self;
+    $self->croak("canceled");
 }
 
 sub canceler {
@@ -106,7 +106,10 @@ sub flat_map {
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
         });
     });
-    $cv_bound->canceler(sub { $cv_current->cancel });
+    $cv_bound->canceler(sub {
+        $cv_current->cb(sub {}); # remove the callback
+        $cv_current->cancel;
+    });
 
     return $cv_bound;
 }
