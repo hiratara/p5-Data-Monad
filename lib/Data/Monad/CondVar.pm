@@ -4,11 +4,17 @@ use warnings;
 use AnyEvent;
 use Exporter qw/import/;
 
-our @EXPORT = qw/call_cc/;
+our @EXPORT = qw/as_cv call_cc/;
 
 sub _assert_cv($) {
     $_[0]->ready and die "[BUG]It already has been ready";
     $_[0];
+}
+
+sub as_cv(&) {
+    my $code = shift;
+    $code->(my $cv = AE::cv);
+    $cv;
 }
 
 sub call_cc(&) {
