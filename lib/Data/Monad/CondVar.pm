@@ -195,21 +195,21 @@ sub sleep {
 sub timeout {
     my ($self, $sec) = @_;
 
-    my $cv = AE::cv;
-    my $timeout_timer = AE::timer $sec, 0, sub {
-        # XXX Seems that AE::timer pass some arguments. Ignore them.
-        _assert_cv $cv;
-        $cv->();
-        undef $cv;
-    };
+    my $timeout = (ref $self)->unit->sleep($sec)->map(sub { $self->cancel });
 
-    $self->map(sub {
-        $cv and (_assert_cv $cv)->(@_);
-        undef $timeout_timer;
-        return;  # void
+    my $result = $self->map(sub { $timeout->cancel; @_ })->catch(sub {
+        return (ref $self)->unit if $_[0] =~ qr/^canceled/;
+        return (ref $self)->fail(@_);
     });
 
-    return $cv;
+    # Add my own canceler to cancel the timeout timer.
+    my $orig_canceler = $result->canceler;
+    $result->canceler(sub {
+        $orig_canceler->();
+        $timeout->cancel;
+    });
+
+    return $result;
 }
 
 1;

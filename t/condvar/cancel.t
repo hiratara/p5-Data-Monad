@@ -138,4 +138,15 @@ subtest 'catch' => sub {
     }
 };
 
+subtest 'timeout' => sub {
+    my $done;
+    my $cv = cv_unit->sleep(.3)->map(sub { $done++ })->timeout(.2);
+
+    cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.3)->recv;
+
+    eval { $cv->recv };
+    like $@, qr/canceled/;
+    ok ! $done;
+};
+
 done_testing;
