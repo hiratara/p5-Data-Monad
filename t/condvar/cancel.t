@@ -85,4 +85,29 @@ subtest 'call_cc' => sub {
     ok ! $should_be_canceled;
 };
 
+subtest 'or_right' => sub {
+    my $done;
+    my $cv = cv_unit->sleep(.2)->map(sub { $done++ })->or(
+        cv_unit->sleep(.2)->map(sub { $done++ })
+    );
+    cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.2)->recv;
+
+    eval { $cv->recv };
+    like $@, qr/canceled/;
+    ok ! $done;
+};
+
+subtest 'or_left' => sub {
+    my $done;
+    my $cv = cv_zero("ERROR")->or(
+        cv_unit->sleep(.2)->map(sub { $done++ })
+    );
+
+    cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.2)->recv;
+
+    eval { $cv->recv };
+    like $@, qr/canceled/;
+    ok ! $done;
+};
+
 done_testing;

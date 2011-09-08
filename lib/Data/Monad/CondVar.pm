@@ -141,6 +141,12 @@ sub or {
             $cv_mixed->croak($@);
         }
     });
+    $cv_mixed->canceler(sub {
+        for ($self, $alter) {
+            $_->cb(sub {});
+            $_->cancel;
+        }
+    });
 
     $cv_mixed;
 }
