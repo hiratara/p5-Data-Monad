@@ -110,4 +110,32 @@ subtest 'or_left' => sub {
     ok ! $done;
 };
 
+subtest 'catch' => sub {
+    {
+        my $done;
+        my $cv = cv_fail->catch(sub {
+            cv_unit->sleep(.2)->map(sub { $done++ });
+        });
+
+        cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.2)->recv;
+
+        eval { $cv->recv };
+        like $@, qr/canceled/;
+        ok ! $done;
+    }
+
+    {
+        my $done;
+        my $cv = cv_unit->sleep(.2)->flat_map(sub { cv_fail })->catch(sub {
+            cv_unit->map(sub { $done++ });
+        });
+
+        cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.2)->recv;
+
+        eval { $cv->recv };
+        like $@, qr/canceled/;
+        ok ! $done;
+    }
+};
+
 done_testing;

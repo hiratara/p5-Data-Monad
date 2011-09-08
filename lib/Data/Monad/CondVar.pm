@@ -159,11 +159,12 @@ sub catch {
     my ($self, $f) = @_;
 
     my $result_cv = AE::cv;
+    my $active_cv = $self;
     $self->cb(sub {
         my @v = eval { $_[0]->recv };
         my $exception = $@ or return $result_cv->(@v);
 
-        my $cv = eval { $f->($exception) };
+        my $cv = $active_cv = eval { $f->($exception) };
         $@ and return (_assert_cv $result_cv)->croak($@);
 
         $cv->cb(sub {
@@ -171,6 +172,10 @@ sub catch {
             _assert_cv $result_cv;
             $@ ? $result_cv->croak($@) : $result_cv->send(@v);
         });
+    });
+    $result_cv->canceler(sub {
+        $active_cv->cb(sub {});
+        $active_cv->cancel;
     });
 
     return $result_cv;
