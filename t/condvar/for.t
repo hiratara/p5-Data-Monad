@@ -14,9 +14,9 @@ sub cv {
 
 is Data::Monad::Base::Sugar::for {
     pick \my $x => sub { cv 10 / 2 };
-    pick \my $y => sub { AnyEvent::CondVar->unit($x + 1) };
-    pick \my $z => sub { AnyEvent::CondVar->unit($x - 1) };
-    pick sub { AnyEvent::CondVar->unit($y * $z) };
+    pick \my $y => sub { cv_unit($x + 1) };
+    pick \my $z => sub { cv_unit($x - 1) };
+    pick sub { cv_unit($y * $z) };
 }->recv, 24;
 
 is_deeply [Data::Monad::Base::Sugar::for {
@@ -28,10 +28,10 @@ is_deeply [Data::Monad::Base::Sugar::for {
 
 is Data::Monad::Base::Sugar::for {
     pick \my $x => sub { cv 10 / 2 };
-    let \my $m => sub { AnyEvent::CondVar->unit($x + 1) };
+    let \my $m => sub { cv_unit($x + 1) };
     pick \my $y => sub { $m };
-    pick \my $z => sub { AnyEvent::CondVar->unit($x - 1) };
-    pick sub { AnyEvent::CondVar->unit($y * $z) };
+    pick \my $z => sub { cv_unit($x - 1) };
+    pick sub { cv_unit($y * $z) };
 }->recv, 24;
 
 done_testing;

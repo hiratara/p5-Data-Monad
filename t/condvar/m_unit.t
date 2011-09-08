@@ -15,13 +15,13 @@ my $cv213 = do {
 
 # naturality
 my $f = sub { map {$_ * 2} @_ };
-is_deeply [AnyEvent::CondVar->unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
-is_deeply [AnyEvent::CondVar->unit($f->(2, 1, 3))->recv], [4, 2, 6];
+is_deeply [cv_unit(2, 1, 3)->map($f)->recv], [4, 2, 6];
+is_deeply [cv_unit($f->(2, 1, 3))->recv], [4, 2, 6];
 
 # unit
-is_deeply [AnyEvent::CondVar->unit($cv213)->flatten->recv], [2, 1, 3];
+is_deeply [cv_unit($cv213)->flatten->recv], [2, 1, 3];
 is_deeply [$cv213->map(sub {
-    AnyEvent::CondVar->unit(@_);
+    cv_unit(@_);
 })->flatten->recv], [2, 1, 3];
 
 done_testing;

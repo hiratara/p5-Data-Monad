@@ -48,7 +48,7 @@ sub monad($$) {
 
 sub monad_lift($$) {
     my ($cv1, $cv2) = @_;
-    AnyEvent::CondVar->lift(sub {$_[0] * $_[1]})->($cv1, $cv2)->recv;
+    cv_lift(sub {$_[0] * $_[1]})->($cv1, $cv2)->recv;
 }
 
 sub monad_for($$) {

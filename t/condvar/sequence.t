@@ -16,7 +16,7 @@ sub cv_after($$) {
     return $cv;
 }
 
-is_deeply [AnyEvent::CondVar->sequence(
+is_deeply [cv_sequence(
     cv_after(2 => 0.3), cv_after(3 => 0.1), cv_after(4 => 0.2)
 )->recv], [2, 3, 4];
 

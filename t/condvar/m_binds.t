@@ -15,10 +15,10 @@ my $cv213 = do {
 
 is_deeply [$cv213->flat_map(sub {
     my @values = @_;
-    AnyEvent::CondVar->unit(map {$_ * 2} @values);
+    cv_unit(map {$_ * 2} @values);
 })->flat_map(sub {
     my @values = @_;
-    AnyEvent::CondVar->unit(map {$_ - 1} @values);
+    cv_unit(map {$_ - 1} @values);
 })->recv], [3, 1, 5];
 
 done_testing;

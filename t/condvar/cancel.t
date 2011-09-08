@@ -5,8 +5,8 @@ use Test::More;
 
 sub _after_dot_4(&) {
     my $code = shift;
-    return AnyEvent::CondVar->unit->sleep(.2)->flat_map(sub {
-        AnyEvent::CondVar->unit->sleep(.2)->map($code);
+    return cv_unit->sleep(.2)->flat_map(sub {
+        cv_unit->sleep(.2)->map($code);
     });
 }
 
@@ -16,7 +16,7 @@ subtest 'flat_map_and_sleep' => sub {
         my $cv = _after_dot_4 { $shouldnt_reach++ };
 
         # cancel when it sleeps to the first time
-        AnyEvent::CondVar->unit->sleep(.1)->map(sub {
+        cv_unit->sleep(.1)->map(sub {
             $cv->cancel;
         })->sleep(.4)->recv;
 
@@ -30,7 +30,7 @@ subtest 'flat_map_and_sleep' => sub {
         my $cv = _after_dot_4 { $shouldnt_reach++ };
 
         # cancel when it sleeps to the second time
-        AnyEvent::CondVar->unit->sleep(.3)->map(sub {
+        cv_unit->sleep(.3)->map(sub {
             $cv->cancel;
         })->sleep(.2)->recv;
 
@@ -44,7 +44,7 @@ subtest 'flat_map_and_sleep' => sub {
         my $cv = _after_dot_4 { $shouldnt_reach++ };
 
         # cancel after it was finished
-        AnyEvent::CondVar->unit->sleep(.5)->map(sub {
+        cv_unit->sleep(.5)->map(sub {
             $cv->cancel;
         })->recv;
 
@@ -61,7 +61,7 @@ subtest 'flat_map_restriction' => sub {
     _after_dot_4 { $should_be_canceled++ }
         ->flat_map(sub { $outer_cv })
         ->cancel;
-    AnyEvent::CondVar->unit->sleep(.9)->recv;
+    cv_unit->sleep(.9)->recv;
 
     ok ! $should_be_canceled;
     ok $shouldnt_be_canceled, "flat_map() can't cancel outer cv.";

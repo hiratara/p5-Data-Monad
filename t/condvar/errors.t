@@ -16,7 +16,7 @@ like $@, qr/^END/;
 eval { $cv->flat_map(sub {die "END"})->recv };
 like $@, qr/^END/;
 
-eval { AnyEvent::CondVar->lift(sub {die "END"})->($cv)->recv };
+eval { cv_lift(sub {die "END"})->($cv)->recv };
 like $@, qr/^END/;
 
 done_testing;

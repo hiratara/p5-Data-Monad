@@ -21,21 +21,21 @@ sub create_cv($) {
         call_cc {
             my $skip = shift;
 
-            my $cv213 = AnyEvent::CondVar->unit(@v);
+            my $cv213 = cv_unit(@v);
             my $cv426 = $cv213->flat_map(sub {
-                AnyEvent::CondVar->unit(map { $_ * 2 } @_);
+                cv_unit(map { $_ * 2 } @_);
             });
             my $cv_skipped = $cv426->flat_map(sub {
-                $should_skip ? $skip->(@_) : AnyEvent::CondVar->unit(@_)
+                $should_skip ? $skip->(@_) : cv_unit(@_)
             });
 
             return $cv_skipped->flat_map(sub {
-                AnyEvent::CondVar->unit(map { $_ * 2 } @_);
+                cv_unit(map { $_ * 2 } @_);
             });
         };
     });
     return $cv1->flat_map(sub {
-        AnyEvent::CondVar->unit(map { $_ * 3 } @_);
+        cv_unit(map { $_ * 3 } @_);
     });
 }
 

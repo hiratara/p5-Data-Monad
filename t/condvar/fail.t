@@ -4,7 +4,7 @@ use AnyEvent;
 use Data::Monad::CondVar;
 use Test::More;
 
-eval { AnyEvent::CondVar->fail("FAIL")->recv };
+eval { cv_fail("FAIL")->recv };
 like $@, qr/^FAIL/;
 
 done_testing;

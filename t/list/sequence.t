@@ -14,7 +14,7 @@ sub eq_sets($$) {
     return 1;
 }
 
-my $list = Data::Monad::List->sequence(
+my $list = list_sequence(
     scalar_list(1, 2), scalar_list(3), scalar_list(4, 5, 6)
 );
 

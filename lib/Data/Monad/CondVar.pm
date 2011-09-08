@@ -4,7 +4,7 @@ use warnings;
 use AnyEvent;
 use Exporter qw/import/;
 
-our @EXPORT = qw/as_cv call_cc/;
+our @EXPORT = qw/as_cv call_cc cv_unit cv_zero cv_fail cv_lift cv_sequence/;
 
 sub _assert_cv($) {
     $_[0]->ready and die "[BUG]It already has been ready";
@@ -37,6 +37,12 @@ sub call_cc(&) {
 
     return $ret_cv;
 }
+
+sub cv_unit { AnyEvent::CondVar->unit(@_) }
+sub cv_zero { AnyEvent::CondVar->zero(@_) }
+sub cv_fail { AnyEvent::CondVar->fail(@_) }
+sub cv_lift { AnyEvent::CondVar->lift(@_) }
+sub cv_sequence { AnyEvent::CondVar->sequence(@_) }
 
 
 package Data::Monad::CondVar::Mixin;
