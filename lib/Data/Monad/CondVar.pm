@@ -73,7 +73,11 @@ sub unit {
 
 sub fail {
     my $class = shift;
-    (my $cv = AE::cv)->croak(@_);
+
+    # XXX cv's croak doesn't throw the error if the message is empty.
+    my $msg = $_[0] || $ZERO;
+    (my $cv = AE::cv)->croak($msg);
+
     return $cv;
 }
 

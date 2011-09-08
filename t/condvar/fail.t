@@ -7,4 +7,7 @@ use Test::More;
 eval { cv_fail("FAIL")->recv };
 like $@, qr/^FAIL/;
 
+eval { cv_fail->recv };
+ok $@;
+
 done_testing;
