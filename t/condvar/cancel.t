@@ -54,4 +54,18 @@ subtest 'flat_map_and_sleep' => sub {
     }
 };
 
+subtest 'flat_map_restriction' => sub {
+    my $should_be_canceled;
+    my $shouldnt_be_canceled;
+    my $outer_cv = _after_dot_4 { $shouldnt_be_canceled++ };
+    _after_dot_4 { $should_be_canceled++ }
+        ->flat_map(sub { $outer_cv })
+        ->cancel;
+    AnyEvent::CondVar->unit->sleep(.9)->recv;
+
+    ok ! $should_be_canceled;
+    ok $shouldnt_be_canceled, "flat_map() can't cancel outer cv.";
+
+};
+
 done_testing;
