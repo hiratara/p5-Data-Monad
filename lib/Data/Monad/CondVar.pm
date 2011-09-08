@@ -29,11 +29,7 @@ sub call_cc(&) {
         return AE::cv; # nop
     };
 
-    $f->($skip)->cb(sub {
-        my @v = eval { $_[0]->recv };
-        _assert_cv $ret_cv;
-        $@ ? $ret_cv->croak($@) : $ret_cv->send(@v);
-    });
+    $f->($skip)->map(sub { $ret_cv->send(@_) });
 
     return $ret_cv;
 }
