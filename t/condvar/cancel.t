@@ -10,46 +10,48 @@ sub _after_dot_4(&) {
     });
 }
 
-{
-    my $shouldnt_reach;
-    my $cv = _after_dot_4 { $shouldnt_reach++ };
+subtest 'flat_map_and_sleep' => sub {
+    {
+        my $shouldnt_reach;
+        my $cv = _after_dot_4 { $shouldnt_reach++ };
 
-    # cancel when it sleeps to the first time
-    AnyEvent::CondVar->unit->sleep(.1)->map(sub {
-        $cv->cancel;
-    })->sleep(.4)->recv;
+        # cancel when it sleeps to the first time
+        AnyEvent::CondVar->unit->sleep(.1)->map(sub {
+            $cv->cancel;
+        })->sleep(.4)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
-    ok ! $shouldnt_reach;
-}
+        eval { $cv->recv };
+        like $@, qr/canceled/;
+        ok ! $shouldnt_reach;
+    };
 
-{
-    my $shouldnt_reach;
-    my $cv = _after_dot_4 { $shouldnt_reach++ };
+    {
+        my $shouldnt_reach;
+        my $cv = _after_dot_4 { $shouldnt_reach++ };
 
-    # cancel when it sleeps to the second time
-    AnyEvent::CondVar->unit->sleep(.3)->map(sub {
-        $cv->cancel;
-    })->sleep(.2)->recv;
+        # cancel when it sleeps to the second time
+        AnyEvent::CondVar->unit->sleep(.3)->map(sub {
+            $cv->cancel;
+        })->sleep(.2)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
-    ok ! $shouldnt_reach;
-}
+        eval { $cv->recv };
+        like $@, qr/canceled/;
+        ok ! $shouldnt_reach;
+    };
 
-{
-    my $shouldnt_reach;
-    my $cv = _after_dot_4 { $shouldnt_reach++ };
+    {
+        my $shouldnt_reach;
+        my $cv = _after_dot_4 { $shouldnt_reach++ };
 
-    # cancel after it was finished
-    AnyEvent::CondVar->unit->sleep(.5)->map(sub {
-        $cv->cancel;
-    })->recv;
+        # cancel after it was finished
+        AnyEvent::CondVar->unit->sleep(.5)->map(sub {
+            $cv->cancel;
+        })->recv;
 
-    eval { $cv->recv };
-    ok ! $@;
-    ok $shouldnt_reach;
-}
+        eval { $cv->recv };
+        ok ! $@;
+        ok $shouldnt_reach;
+    }
+};
 
 done_testing;
