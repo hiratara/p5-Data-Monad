@@ -68,4 +68,21 @@ subtest 'flat_map_restriction' => sub {
 
 };
 
+subtest 'call_cc' => sub {
+    my $should_be_canceled;
+    my $cv = call_cc {
+        my $cont = shift;
+        cv_unit->sleep(.2)->flat_map(sub {
+            $should_be_canceled++;
+            $cont->('OK');
+        })->map(sub { $should_be_canceled++ });
+    };
+
+    cv_unit->sleep(.1)->map(sub { $cv->cancel })
+           ->sleep(.2)->recv;
+    eval { $cv->recv };
+    like $@, qr/canceled/;
+    ok ! $should_be_canceled;
+};
+
 done_testing;

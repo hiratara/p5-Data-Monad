@@ -29,7 +29,13 @@ sub call_cc(&) {
         return AE::cv; # nop
     };
 
-    $f->($skip)->map(sub { $ret_cv->send(@_) });
+    my $branch_cv = $f->($skip)->map(sub {
+        _assert_cv $ret_cv;
+        $ret_cv->send(@_);
+    });
+    $ret_cv->canceler(sub {
+        $branch_cv->cancel;
+    });
 
     return $ret_cv;
 }
