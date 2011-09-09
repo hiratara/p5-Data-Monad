@@ -43,9 +43,7 @@ sub call_cc(&) {
         $ret_cv->croak(@_);
         cv_unit; # void
     });
-    $ret_cv->canceler(sub {
-        $branch_cv->cancel;
-    });
+    $ret_cv->canceler(sub { $branch_cv->cancel });
 
     return $ret_cv;
 }
@@ -87,16 +85,7 @@ sub fail {
 
 sub zero { $_[0]->fail($ZERO) }
 
-sub cancel {
-    my $self = shift;
-    $self->ready and return;
-
-    my $canceler = delete $self->{_monad_canceler};
-    $canceler and $canceler->();
-
-    _assert_cv $self;
-    $self->croak("canceled");
-}
+sub cancel { (delete $_[0]->{_monad_canceler} || sub {})->() }
 
 sub canceler {
     my $cv = shift;
@@ -122,10 +111,7 @@ sub flat_map {
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
         });
     });
-    $cv_bound->canceler(sub {
-        $cv_current->cb(sub {}); # remove the callback
-        $cv_current->cancel;
-    });
+    $cv_bound->canceler(sub { $cv_current->cancel });
 
     return $cv_bound;
 }
@@ -149,12 +135,7 @@ sub or {
             $cv_mixed->croak($@);
         }
     });
-    $cv_mixed->canceler(sub {
-        for ($self, $alter) {
-            $_->cb(sub {});
-            $_->cancel;
-        }
-    });
+    $cv_mixed->canceler(sub { $_->cancel for $self, $alter });
 
     $cv_mixed;
 }
@@ -177,10 +158,7 @@ sub catch {
             $@ ? $result_cv->croak($@) : $result_cv->send(@v);
         });
     });
-    $result_cv->canceler(sub {
-        $active_cv->cb(sub {});
-        $active_cv->cancel;
-    });
+    $result_cv->canceler(sub { $active_cv->cancel });
 
     return $result_cv;
 }
@@ -191,7 +169,7 @@ sub sleep {
         my @v = @_;
         my $cv = AE::cv;
         my $t; $t = AE::timer $sec, 0, sub { $cv->(@v) };
-        $cv->canceler(sub { undef $t });
+        $cv->canceler(sub { undef $t; $cv->croak("canceled") });
         return $cv;
     });
 }
@@ -199,21 +177,32 @@ sub sleep {
 sub timeout {
     my ($self, $sec) = @_;
 
-    my $timeout = (ref $self)->unit->sleep($sec)->map(sub { $self->cancel });
+    my $ret_cv = AE::cv;
+    my ($timeout, $main);
+    $timeout = (ref $self)->unit->sleep($sec)->map(sub {
+        _assert_cv $ret_cv;
+        $ret_cv->();
+        $main->cancel;
+    });
+    # need not catch any errors since $timeout is the private value.
 
-    my $result = $self->map(sub { $timeout->cancel; @_ })->catch(sub {
-        return (ref $self)->unit if $_[0] =~ qr/^canceled/;
-        return (ref $self)->fail(@_);
+    $main = $self->map(sub {
+        _assert_cv $ret_cv;
+        $ret_cv->(@_);
+        $timeout->cancel;
+    })->catch(sub {
+        # $ret_cv already has been ready when timeout occurred.
+        $ret_cv->croak(@_) unless $ret_cv->ready;
+        $timeout->cancel;
+        (ref $self)->fail; # void
     });
 
-    # Add my own canceler to cancel the timeout timer.
-    my $orig_canceler = $result->canceler;
-    $result->canceler(sub {
-        $orig_canceler->();
+    $ret_cv->canceler(sub {
+        $main->cancel;
         $timeout->cancel;
     });
 
-    return $result;
+    return $ret_cv;
 }
 
 1;

@@ -125,16 +125,14 @@ subtest 'catch' => sub {
     }
 
     {
-        my $done;
         my $cv = cv_unit->sleep(.2)->flat_map(sub { cv_fail })->catch(sub {
-            cv_unit->map(sub { $done++ });
+            like $_[0], qr/canceled/, "catch the 'canceled' error";
+            cv_unit("OK");
         });
 
         cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.2)->recv;
 
-        eval { $cv->recv };
-        like $@, qr/canceled/;
-        ok ! $done;
+        is $cv->recv, "OK";
     }
 };
 
