@@ -85,6 +85,30 @@ sub fail {
 
 sub zero { $_[0]->fail($ZERO) }
 
+sub any {
+    my ($class, @cvs) = @_;
+
+    my $sent;
+    my $result_cv = AE::cv;
+    for (@cvs) {
+        $_->map(sub {
+            return if $sent;
+            $result_cv->send(@_);
+            $sent++;
+            $result_cv->cancel;
+        })->catch(sub {
+            return $class->unit if $sent;
+            $result_cv->croak(@_);
+            $sent++;
+            $result_cv->cancel;
+            return $class->unit;
+        });
+    }
+    $result_cv->canceler(sub { $_->cancel for @cvs });
+
+    $result_cv;
+}
+
 sub cancel { (delete $_[0]->{_monad_canceler} || sub {})->() }
 
 sub canceler {
