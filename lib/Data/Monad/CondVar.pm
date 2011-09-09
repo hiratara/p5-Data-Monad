@@ -226,33 +226,9 @@ sub sleep {
 
 sub timeout {
     my ($self, $sec) = @_;
+    my $class = ref $self;
 
-    my $ret_cv = AE::cv;
-    my ($timeout, $main);
-    $timeout = (ref $self)->unit->sleep($sec)->map(sub {
-        _assert_cv $ret_cv;
-        $ret_cv->();
-        $main->cancel;
-    });
-    # need not catch any errors since $timeout is the private value.
-
-    $main = $self->map(sub {
-        _assert_cv $ret_cv;
-        $ret_cv->(@_);
-        $timeout->cancel;
-    })->catch(sub {
-        # $ret_cv already has been ready when timeout occurred.
-        $ret_cv->croak(@_) unless $ret_cv->ready;
-        $timeout->cancel;
-        (ref $self)->fail; # void
-    });
-
-    $ret_cv->canceler(sub {
-        $main->cancel;
-        $timeout->cancel;
-    });
-
-    return $ret_cv;
+    $class->any($class->unit->sleep($sec), $self);
 }
 
 1;
