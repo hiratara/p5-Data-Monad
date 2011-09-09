@@ -67,6 +67,11 @@ our $ZERO = "[ZERO of ${\ __PACKAGE__}]";
 
 *_assert_cv = \&Data::Monad::CondVar::_assert_cv;
 
+sub _cv_or_die($) {
+    Scalar::Util::blessed $_[0] && $_[0]->isa('AnyEvent::CondVar')
+        or Carp::croak "You must use CondVar object here.";
+}
+
 sub unit {
     my $class = shift;
     (my $cv = AE::cv)->send(@_);
@@ -149,7 +154,11 @@ sub flat_map {
     my $cv_bound = AE::cv;
     my $cv_current = $self;
     $self->cb(sub {
-        my ($cv) = ($cv_current) = eval { $f->($_[0]->recv) };
+        my $cv = $cv_current = eval {
+            my ($cv) = $f->($_[0]->recv);
+            _cv_or_die $cv;
+            $cv;
+        };
 
         if ($@) {
             _assert_cv $cv_bound;
@@ -199,7 +208,11 @@ sub catch {
         my @v = eval { $_[0]->recv };
         my $exception = $@ or return $result_cv->(@v);
 
-        my $cv = $active_cv = eval { $f->($exception) };
+        my $cv = $active_cv = eval {
+            my $cv = $f->($exception);
+            _cv_or_die $cv;
+            $cv;
+        };
         $@ and return (_assert_cv $result_cv)->croak($@);
 
         $cv->cb(sub {
