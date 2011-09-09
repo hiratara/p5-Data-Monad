@@ -38,6 +38,10 @@ sub call_cc(&) {
     my $branch_cv = $f->($skip)->map(sub {
         _assert_cv $ret_cv;
         $ret_cv->send(@_);
+    })->catch(sub {
+        _assert_cv $ret_cv;
+        $ret_cv->croak(@_);
+        cv_unit; # void
     });
     $ret_cv->canceler(sub {
         $branch_cv->cancel;
