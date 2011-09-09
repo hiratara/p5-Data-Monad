@@ -93,18 +93,15 @@ sub zero { $_[0]->fail($ZERO) }
 sub any {
     my ($class, @cvs) = @_;
 
-    my $sent;
     my $result_cv = AE::cv;
     for (@cvs) {
         $_->map(sub {
-            return if $sent;
+            _assert_cv $result_cv;
             $result_cv->send(@_);
-            $sent++;
             $result_cv->cancel;
         })->catch(sub {
-            return $class->unit if $sent;
+            _assert_cv $result_cv;
             $result_cv->croak(@_);
-            $sent++;
             $result_cv->cancel;
             return $class->unit;
         });
@@ -117,18 +114,21 @@ sub any {
 sub all {
     my ($class, @cvs) = @_;
 
-    my (@result, $sent);
-    (my $result_cv = AE::cv)->begin(sub { $_[0]->send(@result) });
+    my @result;
+    (my $result_cv = AE::cv)->begin(sub {
+        my ($cv) = @_;
+        _assert_cv $cv;
+        $cv->send(@result);
+    });
     for my $i (0 .. $#cvs) {
         $result_cv->begin;
 
         $cvs[$i]->map(sub {
-            return if $sent;
             $result[$i] = [@_];
             $result_cv->end;
         })->catch(sub {
-            return $class->unit if $sent;
-            $result_cv->croak(@_), $sent++;
+            _assert_cv $result_cv;
+            $result_cv->croak(@_);
             $result_cv->cancel;
             return $class->unit;
         });
@@ -232,7 +232,7 @@ sub sleep {
         my @v = @_;
         my $cv = AE::cv;
         my $t; $t = AE::timer $sec, 0, sub { $cv->(@v) };
-        $cv->canceler(sub { undef $t; $cv->croak("canceled") });
+        $cv->canceler(sub { undef $t });
         return $cv;
     });
 }

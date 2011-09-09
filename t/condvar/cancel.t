@@ -20,8 +20,7 @@ subtest 'flat_map_and_sleep' => sub {
             $cv->cancel;
         })->sleep(.04)->recv;
 
-        eval { $cv->recv };
-        like $@, qr/canceled/;
+        ok ! $cv->ready;
         ok ! $shouldnt_reach;
     };
 
@@ -34,22 +33,20 @@ subtest 'flat_map_and_sleep' => sub {
             $cv->cancel;
         })->sleep(.02)->recv;
 
-        eval { $cv->recv };
-        like $@, qr/canceled/;
+        ok ! $cv->ready;
         ok ! $shouldnt_reach;
     };
 
     {
         my $shouldnt_reach;
-        my $cv = _after_dot_4 { $shouldnt_reach++ };
+        my $cv = _after_dot_4 { $shouldnt_reach++; "OK" };
 
         # cancel after it was finished
         cv_unit->sleep(.05)->map(sub {
             $cv->cancel;
         })->recv;
 
-        eval { $cv->recv };
-        ok ! $@;
+        is $cv->recv, "OK";
         ok $shouldnt_reach;
     }
 };
@@ -80,8 +77,7 @@ subtest 'call_cc' => sub {
 
     cv_unit->sleep(.01)->map(sub { $cv->cancel })
            ->sleep(.02)->recv;
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $should_be_canceled;
 };
 
@@ -92,8 +88,7 @@ subtest 'or_right' => sub {
     );
     cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.02)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $done;
 };
 
@@ -105,8 +100,7 @@ subtest 'or_left' => sub {
 
     cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.02)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $done;
 };
 
@@ -119,20 +113,20 @@ subtest 'catch' => sub {
 
         cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.02)->recv;
 
-        eval { $cv->recv };
-        like $@, qr/canceled/;
+        ok ! $cv->ready;
         ok ! $done;
     }
 
     {
+        my $done;
         my $cv = cv_unit->sleep(.02)->flat_map(sub { cv_fail })->catch(sub {
-            like $_[0], qr/canceled/, "catch the 'canceled' error";
-            cv_unit("OK");
+            $done++;
         });
 
         cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.02)->recv;
 
-        is $cv->recv, "OK";
+        ok ! $cv->ready;
+        ok ! $done;
     }
 };
 
@@ -142,8 +136,7 @@ subtest 'timeout' => sub {
 
     cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.03)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $done;
 };
 
@@ -157,8 +150,7 @@ subtest 'any' => sub {
 
     cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.04)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $done;
 };
 
@@ -172,8 +164,7 @@ subtest 'all' => sub {
 
     cv_unit->sleep(.01)->map(sub { $cv->cancel })->sleep(.04)->recv;
 
-    eval { $cv->recv };
-    like $@, qr/canceled/;
+    ok ! $cv->ready;
     ok ! $done;
 };
 
