@@ -162,4 +162,19 @@ subtest 'any' => sub {
     ok ! $done;
 };
 
+subtest 'all' => sub {
+    my $done;
+    my $cv = AnyEvent::CondVar->all(
+        cv_unit("NG")->sleep(.3)->map(sub { $done++ }),
+        cv_unit("OK")->sleep(.2)->map(sub { $done++ }),
+        cv_unit("NG")->sleep(.4)->map(sub { $done++ }),
+    );
+
+    cv_unit->sleep(.1)->map(sub { $cv->cancel })->sleep(.4)->recv;
+
+    eval { $cv->recv };
+    like $@, qr/canceled/;
+    ok ! $done;
+};
+
 done_testing;

@@ -109,6 +109,32 @@ sub any {
     $result_cv;
 }
 
+sub all {
+    my ($class, @cvs) = @_;
+
+    my (@result, $sent);
+    (my $result_cv = AE::cv)->begin(sub { $_[0]->send(@result) });
+    for my $i (0 .. $#cvs) {
+        $result_cv->begin;
+
+        $cvs[$i]->map(sub {
+            return if $sent;
+            $result[$i] = [@_];
+            $result_cv->end;
+        })->catch(sub {
+            return $class->unit if $sent;
+            $result_cv->croak(@_), $sent++;
+            $result_cv->cancel;
+            return $class->unit;
+        });
+    }
+    $result_cv->end;
+
+    $result_cv->canceler(sub { $_->cancel for @cvs });
+
+    $result_cv;
+}
+
 sub cancel { (delete $_[0]->{_monad_canceler} || sub {})->() }
 
 sub canceler {
