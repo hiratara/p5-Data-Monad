@@ -1,7 +1,7 @@
 package Data::Monad::Maybe;
 use strict;
 use warnings;
-use parent qw/Data::Monad::Base::Monad/;
+use parent qw/Data::Monad::Base::MonadZero/;
 use Scalar::Util qw/reftype/;
 use Exporter qw/import/;
 
@@ -15,12 +15,17 @@ sub unit {
     just @_;
 }
 
+sub zero {
+    my $class = shift;
+    nothing;
+}
+
 sub flat_map {
     my ($self, $f) = @_;
     $self->is_nothing ? $self : $f->($self->value);
 }
 
 sub is_nothing { reftype $_[0] ne 'ARRAY' }
-sub value { @{$_[0]} }
+sub value { wantarray ? @{$_[0]} : $_[0][0] }
 
 1;

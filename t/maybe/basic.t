@@ -37,4 +37,24 @@ sub get_key($) {
     })->map(sub { "DUMMY" })->is_nothing;
 }
 
+{
+    ok +Data::Monad::Maybe->zero->is_nothing;
+    ok +Data::Monad::Maybe->zero->flat_map(sub { just 1 })->is_nothing;
+    ok just(1)->flat_map(sub { Data::Monad::Maybe->zero })->is_nothing;
+}
+
+{
+    ok Data::Monad::Base::Sugar::for {
+        pick \my $just => sub { just 1 };
+        satisfy { $just >= 10 };
+        yield { $just };
+    }->is_nothing;
+
+    is Data::Monad::Base::Sugar::for {
+        pick \my $just => sub { just 15 };
+        satisfy { $just >= 10 };
+        yield { $just };
+    }->value, 15;
+}
+
 done_testing;
