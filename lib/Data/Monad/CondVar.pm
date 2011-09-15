@@ -2,6 +2,7 @@ package Data::Monad::CondVar;
 use strict;
 use warnings;
 use AnyEvent;
+use Scalar::Util;
 use Exporter qw/import/;
 
 our @EXPORT = qw/as_cv cv_unit cv_zero cv_fail cv_lift cv_sequence call_cc/;
@@ -94,15 +95,17 @@ sub any {
     my ($class, @cvs) = @_;
 
     my $result_cv = AE::cv;
+    Scalar::Util::weaken (my $weak_cv = $result_cv);
+
     for (@cvs) {
         $_->map(sub {
-            _assert_cv $result_cv;
-            $result_cv->send(@_);
-            $result_cv->cancel;
+            _assert_cv $weak_cv;
+            $weak_cv->send(@_);
+            $weak_cv->cancel;
         })->catch(sub {
-            _assert_cv $result_cv;
-            $result_cv->croak(@_);
-            $result_cv->cancel;
+            _assert_cv $weak_cv;
+            $weak_cv->croak(@_);
+            $weak_cv->cancel;
             return $class->unit;
         });
     }

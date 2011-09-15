@@ -8,13 +8,13 @@ use Test::More;
 no_leaks_ok { cv_unit->sleep(.001)->recv };
 no_leaks_ok { cv_unit->sleep(0)->flat_map(sub { cv_unit })->recv };
 no_leaks_ok { cv_unit->flat_map(sub { cv_unit->sleep(0) })->recv };
+no_leaks_ok {
+    cv_unit->sleep(.0002)->timeout(.0003);
+    cv_unit->sleep(.001)->recv;
+};
 
 TODO: {
     local $TODO = "Haven't fixed yet";
-    no_leaks_ok {
-        cv_unit->sleep(.0002)->timeout(.0003);
-        cv_unit->sleep(.001)->recv;
-    };
 
     no_leaks_ok {
         Data::Monad::Base::Sugar::for {
