@@ -231,7 +231,7 @@ sub sleep {
     $self->flat_map(sub {
         my @v = @_;
         my $cv = AE::cv;
-        my $t; $t = AE::timer $sec, 0, sub { $cv->(@v) };
+        my $t; $t = AE::timer $sec, 0, sub { $cv->(@v); undef $cv };
         $cv->canceler(sub { undef $t });
         return $cv;
     });
