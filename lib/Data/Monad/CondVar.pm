@@ -175,7 +175,10 @@ sub flat_map {
             $@ ? $cv_bound->croak($@) : $cv_bound->send(@v);
         });
     });
-    $cv_bound->canceler(sub { $cv_current->cancel });
+    $cv_bound->canceler(sub {
+        $cv_current->cancel;
+        $cv_current->cb(undef); # release the callback function
+    });
 
     return $cv_bound;
 }
@@ -226,7 +229,10 @@ sub catch {
             $@ ? $result_cv->croak($@) : $result_cv->send(@v);
         });
     });
-    $result_cv->canceler(sub { $active_cv->cancel });
+    $result_cv->canceler(sub {
+        $active_cv->cancel;
+        $active_cv->cb(undef); # release the callback function
+    });
 
     return $result_cv;
 }

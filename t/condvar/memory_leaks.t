@@ -40,4 +40,6 @@ no_leaks_ok {
     }->recv;
 };
 
+no_leaks_ok { cv_unit->sleep(0)->cancel };
+
 done_testing;
