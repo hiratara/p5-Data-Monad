@@ -43,7 +43,7 @@ sub call_cc(&) {
         _assert_cv $ret_cv;
         $ret_cv->croak(@_);
         cv_unit; # void
-    });
+    })->catch(sub { warn @_ });
     $ret_cv->canceler(sub { $branch_cv->cancel });
 
     return $ret_cv;
@@ -107,7 +107,7 @@ sub any {
             $weak_cv->croak(@_);
             $weak_cv->cancel;
             return $class->unit;
-        });
+        })->catch(sub { warn @_ });
     }
     $result_cv->canceler(sub { $_->cancel for @cvs });
 
@@ -134,7 +134,7 @@ sub all {
             $result_cv->croak(@_);
             $result_cv->cancel;
             return $class->unit;
-        });
+        })->catch(sub { warn @_ });
     }
     $result_cv->end;
 
