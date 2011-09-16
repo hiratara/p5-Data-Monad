@@ -99,10 +99,12 @@ sub any {
 
     for (@cvs) {
         $_->map(sub {
+            return unless $weak_cv;
             _assert_cv $weak_cv;
             $weak_cv->send(@_);
             $weak_cv->cancel;
         })->catch(sub {
+            return unless $weak_cv;
             _assert_cv $weak_cv;
             $weak_cv->croak(@_);
             $weak_cv->cancel;

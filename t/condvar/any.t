@@ -3,6 +3,16 @@ use warnings;
 use Data::Monad::CondVar;
 use Test::More;
 
+sub capture_warn(&) {
+    my $code = shift;
+    my @warns;
+    local $SIG{__WARN__} = sub { push @warns, @_ };
+
+    $code->();
+
+    return @warns;
+}
+
 {
     my $done;
     is +AnyEvent::CondVar->any(
@@ -17,6 +27,13 @@ use Test::More;
 {
     eval { AnyEvent::CondVar->any(cv_fail "fail immediately")->recv };
     like $@, qr/\bimmediately\b/;
+}
+
+{
+    is_deeply [capture_warn {
+        AnyEvent::CondVar->any(cv_unit->sleep(0));
+        cv_unit->sleep(0)->recv;
+    }], [];
 }
 
 done_testing;
