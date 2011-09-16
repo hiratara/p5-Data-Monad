@@ -95,23 +95,22 @@ sub any {
     my ($class, @cvs) = @_;
 
     my $result_cv = AE::cv;
-    Scalar::Util::weaken (my $weak_cv = $result_cv);
-
+    my @any_cv;
     for (@cvs) {
-        $_->map(sub {
-            return unless $weak_cv;
-            _assert_cv $weak_cv;
-            $weak_cv->send(@_);
-            $weak_cv->cancel;
+        push @any_cv, $_->map(sub {
+            return unless $result_cv;
+            _assert_cv $result_cv;
+            $result_cv->send(@_);
+            $result_cv->cancel;
         })->catch(sub {
-            return unless $weak_cv;
-            _assert_cv $weak_cv;
-            $weak_cv->croak(@_);
-            $weak_cv->cancel;
+            return unless $result_cv;
+            _assert_cv $result_cv;
+            $result_cv->croak(@_);
+            $result_cv->cancel;
             return $class->unit;
         })->catch(sub { warn @_ });
     }
-    $result_cv->canceler(sub { $_->cancel for @cvs });
+    $result_cv->canceler(sub { $_->cancel for @any_cv });
 
     $result_cv;
 }
