@@ -35,6 +35,9 @@ sub for(&) {
 
     my @blocks;
     {
+        # XXX I don't know why I should weaken this reference...
+        weaken (my $weak_blocks = \@blocks);
+
         local $_PICK = sub {
             my ($ref, $block) = @_;
             $block = $ref, $ref = undef unless defined $block;
@@ -50,11 +53,12 @@ sub for(&) {
 
         local $_SATISFY = sub {
             my $predicate = shift;
-            die "satisfy() should be called after pick()." unless @blocks;
+            die "satisfy() should be called after pick()."
+                                                          unless @$weak_blocks;
 
-            my $orig_block = $blocks[$#blocks]->{block};
-            my $orig_ref   = $blocks[$#blocks]->{ref};
-            $blocks[$#blocks]->{block} = sub {
+            my $orig_block = $weak_blocks->[$#$weak_blocks]->{block};
+            my $orig_ref   = $weak_blocks->[$#$weak_blocks]->{ref};
+            $weak_blocks->[$#$weak_blocks]->{block} = sub {
                 $orig_block->()->filter(sub {
                     _capture @_ => $orig_ref;
                     $predicate->(@_);
@@ -65,20 +69,20 @@ sub for(&) {
         local $_LET = sub {
             my ($ref, $block) = @_;
 
-            unless (@blocks) {
+            unless (@$weak_blocks) {
                 # eval immediately because we aren't in any lambdas.
                 _capture $block->() => $ref;
                 return;
             }
 
-            my $orig_block = $blocks[$#blocks]->{block};
-            my $orig_ref   = $blocks[$#blocks]->{ref};
+            my $orig_block = $weak_blocks->[$#$weak_blocks]->{block};
+            my $orig_ref   = $weak_blocks->[$#$weak_blocks]->{ref};
 
             # Capture multiple values.
             # A tupple is used in "p <- e; p' = e'" pattern.
             # See: http://www.scala-lang.org/docu/files/ScalaReference.pdf
-            $blocks[$#blocks]->{ref} = _tuple $orig_ref, $ref;
-            $blocks[$#blocks]->{block} = sub {
+            $weak_blocks->[$#$weak_blocks]->{ref} = _tuple $orig_ref, $ref;
+            $weak_blocks->[$#$weak_blocks]->{block} = sub {
                 $orig_block->()->map(sub {
                     _capture @_ => $orig_ref;
                     return _tuple [@_], [$block->()];

@@ -18,19 +18,26 @@ no_leaks_ok {
 no_leaks_ok {
     Data::Monad::Base::Sugar::for { pick sub { cv_unit }; yield {} }->recv;
 };
-
-TODO: {
-    local $TODO = "Haven't fixed yet";
-
-    no_leaks_ok {
-        Data::Monad::Base::Sugar::for {
-            pick \my $x => sub { cv_unit(10 / 2)->sleep(0) };
-            let \my $m => sub { cv_unit($x + 1) };
-            pick \my $y => sub { $m };
-            pick \my $z => sub { cv_unit($x - 1) };
-            pick sub { cv_unit($y * $z) };
-        }->recv;
-    };
-}
+no_leaks_ok {
+    Data::Monad::Base::Sugar::for {
+        pick sub { cv_unit };
+        let \my $x => sub { cv_unit };
+    }->recv;
+};
+no_leaks_ok {
+    Data::Monad::Base::Sugar::for {
+        pick sub { cv_unit };
+        satisfy { ! defined $_[0] };
+     }->recv;
+};
+no_leaks_ok {
+    Data::Monad::Base::Sugar::for {
+        pick \my $x => sub { cv_unit(10 / 2)->sleep(0) };
+        let \my $m => sub { cv_unit($x + 1) };
+        pick \my $y => sub { $m };
+        pick \my $z => sub { cv_unit($x - 1) };
+        pick sub { cv_unit($y * $z) };
+    }->recv;
+};
 
 done_testing;
