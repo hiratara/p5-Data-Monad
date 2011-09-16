@@ -1,7 +1,7 @@
 package Data::Monad::Base::Sugar;
 use strict;
 use warnings;
-use Scalar::Util qw/blessed/;
+use Scalar::Util qw/blessed weaken/;
 use Exporter qw/import/;
 
 our @EXPORT = qw/pick satisfy yield let/;
@@ -88,7 +88,8 @@ sub for(&) {
         $code->();
     }
 
-    my $loop; $loop = sub {
+    my $weak_loop;
+    my $loop = sub {
         my @blocks = @_;
 
         my $info = shift @blocks;
@@ -103,12 +104,13 @@ sub for(&) {
         } elsif (@blocks) {
             return $m->flat_map(sub {
                 _capture @_ => $ref;
-                $loop->(@blocks);
+                $weak_loop->(@blocks);
             });
         } else {
             return $m;
         }
     };
+    weaken($weak_loop = $loop);
 
     return $loop->(@blocks);
 }

@@ -12,6 +12,12 @@ no_leaks_ok {
     cv_unit->sleep(.0002)->timeout(.0003);
     cv_unit->sleep(.001)->recv;
 };
+no_leaks_ok {
+    Data::Monad::Base::Sugar::for { pick sub { cv_unit } }->recv;
+};
+no_leaks_ok {
+    Data::Monad::Base::Sugar::for { pick sub { cv_unit }; yield {} }->recv;
+};
 
 TODO: {
     local $TODO = "Haven't fixed yet";
