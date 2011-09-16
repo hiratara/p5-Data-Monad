@@ -35,9 +35,6 @@ sub for(&) {
 
     my @blocks;
     {
-        # XXX I don't know why I should weaken this reference...
-        weaken (my $weak_blocks = \@blocks);
-
         local $_PICK = sub {
             my ($ref, $block) = @_;
             $block = $ref, $ref = undef unless defined $block;
@@ -54,13 +51,16 @@ sub for(&) {
         local $_SATISFY = sub {
             my $predicate = shift;
             die "satisfy() should be called after pick()."
-                                                          unless @$weak_blocks;
+                                                          unless @blocks;
 
-            my $orig_block = $weak_blocks->[$#$weak_blocks]->{block};
-            my $orig_ref   = $weak_blocks->[$#$weak_blocks]->{ref};
-            $weak_blocks->[$#$weak_blocks]->{block} = sub {
+            my $slot = $#blocks;
+            my $orig_block = $blocks[$slot]->{block};
+            my $orig_ref   = $blocks[$slot]->{ref};
+
+            $blocks[$slot]->{block} = sub {
                 $orig_block->()->filter(sub {
                     _capture @_ => $orig_ref;
+                    delete $blocks[$slot]; # destroy the cyclic ref
                     $predicate->(@_);
                 });
             };
@@ -69,22 +69,24 @@ sub for(&) {
         local $_LET = sub {
             my ($ref, $block) = @_;
 
-            unless (@$weak_blocks) {
+            unless (@blocks) {
                 # eval immediately because we aren't in any lambdas.
                 _capture $block->() => $ref;
                 return;
             }
 
-            my $orig_block = $weak_blocks->[$#$weak_blocks]->{block};
-            my $orig_ref   = $weak_blocks->[$#$weak_blocks]->{ref};
+            my $slot = $#blocks;
+            my $orig_block = $blocks[$slot]->{block};
+            my $orig_ref   = $blocks[$slot]->{ref};
 
             # Capture multiple values.
             # A tupple is used in "p <- e; p' = e'" pattern.
             # See: http://www.scala-lang.org/docu/files/ScalaReference.pdf
-            $weak_blocks->[$#$weak_blocks]->{ref} = _tuple $orig_ref, $ref;
-            $weak_blocks->[$#$weak_blocks]->{block} = sub {
+            $blocks[$slot]->{ref} = _tuple $orig_ref, $ref;
+            $blocks[$slot]->{block} = sub {
                 $orig_block->()->map(sub {
                     _capture @_ => $orig_ref;
+                    delete $blocks[$slot]; # destroy the cyclic ref
                     return _tuple [@_], [$block->()];
                 });
             };
