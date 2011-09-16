@@ -42,4 +42,10 @@ no_leaks_ok {
 
 no_leaks_ok { cv_unit->sleep(0)->cancel };
 
+no_leaks_ok { cv_unit->sleep(0)->or(cv_unit)->cancel };
+no_leaks_ok { cv_unit->sleep(0)->or(cv_unit->sleep(0))->cancel };
+no_leaks_ok { cv_unit->or(cv_unit->sleep(0))->cancel };
+no_leaks_ok { cv_unit->sleep(0)->or(cv_unit->sleep(0))->recv };
+no_leaks_ok { cv_unit->sleep(0)->fail->or(cv_unit->sleep(0))->recv };
+
 done_testing;
