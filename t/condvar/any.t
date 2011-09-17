@@ -33,7 +33,7 @@ sub capture_warn(&) {
     is_deeply [capture_warn {
         AnyEvent::CondVar->any(cv_unit->sleep(0));
         cv_unit->sleep(0)->recv;
-    }], [];
+    }], [], "No warnings even when the return value isn't retained.";
 }
 
 done_testing;
