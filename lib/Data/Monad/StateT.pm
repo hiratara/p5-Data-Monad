@@ -14,7 +14,7 @@ sub new_class {
     my ($inner_monad) = @_;
 
     my $class_name = __PACKAGE__ . '::' . _safe_name($inner_monad);
-    {
+    unless ($class_name->isa(__PACKAGE__)) {
         no strict qw/refs/;
         @{"$class_name\::ISA"} = (__PACKAGE__);
         *{"$class_name\::inner_monad"} = sub { $inner_monad };
