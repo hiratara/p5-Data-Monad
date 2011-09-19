@@ -17,6 +17,9 @@ sub new_class {
         no strict qw/refs/;
         @{"$class_name\::ISA"} = ($class);
         *{"$class_name\::inner_monad"} = sub { $inner_monad };
+        *{"$class_name\::new_class"} = sub {
+            die "Don't call the new_class() method from sub classes.";
+        };
     }
 
     return $class_name;
