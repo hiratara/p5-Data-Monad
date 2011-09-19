@@ -1,29 +1,7 @@
 package Data::Monad::StateT;
 use strict;
 use warnings;
-use parent qw/Data::Monad::Base::Monad/;
-
-sub _safe_name($) {
-    my $name = shift;
-    $name =~ s|::|__|g;
-    return "__$name";
-}
-
-sub new_class {
-    my $class = shift;
-    my ($inner_monad) = @_;
-
-    my $class_name = __PACKAGE__ . '::' . _safe_name($inner_monad);
-    unless ($class_name->isa(__PACKAGE__)) {
-        no strict qw/refs/;
-        @{"$class_name\::ISA"} = (__PACKAGE__);
-        *{"$class_name\::inner_monad"} = sub { $inner_monad };
-    }
-
-    return $class_name;
-}
-
-sub inner_monad { die "Implement this method in sub classes" }
+use parent qw/Data::Monad::Base::Monad  Data::Monad::Base::Transformer/;
 
 sub t_lift {
     my $class = shift;
