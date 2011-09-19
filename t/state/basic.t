@@ -9,9 +9,9 @@ subtest sugars => sub {
         ["GOOD"], \@s;
     };
 
-    is_deeply [$good->("state")], [["GOOD"], ["state"]];
-    is +$good->eval("state"), "GOOD";
-    is +$good->exec("state"), "state";
+    is_deeply [$good->run_state("state")], [["GOOD"], ["state"]];
+    is +$good->eval_state("state"), "GOOD";
+    is +$good->exec_state("state"), "state";
 };
 
 subtest flat_map => sub {
@@ -30,8 +30,8 @@ subtest flat_map => sub {
 
     my $good_popper = $good->flat_map($pop);
 
-    is_deeply [$good_popper->eval("s2", "s3")], [qw/s1 s2/];
-    is_deeply [$good_popper->exec("s2", "s3")], [qw/s3/];
+    is_deeply [$good_popper->eval_state("s2", "s3")], [qw/s1 s2/];
+    is_deeply [$good_popper->exec_state("s2", "s3")], [qw/s3/];
 };
 
 subtest set_get => sub {
@@ -40,8 +40,8 @@ subtest set_get => sub {
     my $m_get = Data::Monad::State->get;
 
     my $m_set_get = $m_set->flat_map(sub { $m_get });
-    is_deeply [$m_set_get->eval('dummy state')], [qw/Hello StateT/];
-    is_deeply [$m_set_get->exec('dummy state')], [qw/Hello StateT/];
+    is_deeply [$m_set_get->eval_state('dummy state')], [qw/Hello StateT/];
+    is_deeply [$m_set_get->exec_state('dummy state')], [qw/Hello StateT/];
 };
 
 done_testing;
