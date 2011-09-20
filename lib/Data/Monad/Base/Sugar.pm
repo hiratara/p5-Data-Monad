@@ -137,7 +137,7 @@ Data::Monad::Base::Sugar - Syntax sugars for Data::Monad.
   my $result = Data::Monad::Base::Sugar::for {
       pick \my $x => sub { scalar_list 1 .. 100 };
       pick \my $y => sub { scalar_list $x .. 100 };
-      pick \my $z => sub { scalar_list 1 .. 100 };
+      pick \my $z => sub { scalar_list $y .. ($x + $y > 100 ? 100 : $x + $y) };
       satisfy { $x**2 + $y**2 == $z**2 };
       yield { $x, $y, $z }
   };
