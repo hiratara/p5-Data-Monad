@@ -29,3 +29,69 @@ sub is_nothing { reftype $_[0] ne 'ARRAY' }
 sub value { wantarray ? @{$_[0]} : $_[0][0] }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Data::Monad::Maybe - The Maybe monad.
+
+=head1 SYNOPSIS
+
+  use Data::Monad::Maybe;
+  sub div {
+      my ($n, $m) = @_;
+      $m == 0 ? nothing : just($n / $m);
+  }
+
+  # answer: 1.5
+  print just(3, 2)->flat_map(\&div)
+                  ->map(sub { "answer: $_[0]" })
+                  ->value, "\n";
+
+  # nothing
+  print "nothing\n" if just(3, 0)->flat_map(\&div)
+                                 ->map(sub { "answer: $_[0]" })
+                                 ->is_nothing;
+
+=head1 DESCRIPTION
+
+Data::Monad::Maybe represents optional values.
+
+This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
+
+=head1 METHODS
+
+=over 4
+
+=item just
+
+=item nothing
+
+=item unit
+
+=item zero
+
+=item flat_map
+
+=item is_nothing
+
+=item value
+
+=back
+
+=head1 AUTHOR
+
+hiratara E<lt>hiratara {at} cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+L<Data::Monad::Base::Monad>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+

@@ -42,3 +42,67 @@ sub scalars {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Data::Monad::List - The List monad.
+
+=head1 SYNOPSIS
+
+  use Data::Monad::List;
+  my $m = scalar_list(10, 20);
+  $m = $m->flat_map(sub {
+      my $v = shift;
+      scalar_list($v + 1, $v + 2);
+  });
+  my @result = $m->scalars; # (11, 12, 21, 22)
+
+=head1 DESCRIPTION
+
+Data::Monad::List represents non-deterministic values.
+
+This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
+
+=head1 METHODS
+
+=over 4
+
+=item scalar_list
+
+=item list_unit
+
+=item list_zero
+
+=item list_lift
+
+=item list_sequence
+
+=item new
+
+=item unit
+
+=item zero
+
+=item flat_map
+
+=item scalars
+
+=back
+
+=head1 AUTHOR
+
+hiratara E<lt>hiratara {at} cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+L<Data::Monad::Base::Monad>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+

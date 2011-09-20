@@ -122,3 +122,60 @@ sub for(&) {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Data::Monad::Base::Sugar - Syntax sugars for Data::Monad.
+
+=head1 SYNOPSIS
+
+  use Data::Monad::Base::Sugar;
+  use Data::Monad::List;
+
+  my $result = Data::Monad::Base::Sugar::for {
+      pick \my $x => sub { scalar_list 1 .. 100 };
+      pick \my $y => sub { scalar_list $x .. 100 };
+      pick \my $z => sub { scalar_list 1 .. 100 };
+      satisfy { $x**2 + $y**2 == $z**2 };
+      yield { $x, $y, $z }
+  };
+
+=head1 DESCRIPTION
+
+Data::Monad::Base::Sugar provides syntax sugars for Data::Monad.
+
+The for method is known as "do" expression in Haskell.
+
+=head1 METHODS
+
+=over 4
+
+=item for
+
+=item pick
+
+=item let
+
+=item satisfy
+
+=item yield
+
+=back
+
+=head1 AUTHOR
+
+hiratara E<lt>hiratara {at} cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+L<Data::Monad::Base::Monad>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+

@@ -255,3 +255,92 @@ sub timeout {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Data::Monad::CondVar - The CondVar monad.
+
+=head1 SYNOPSIS
+
+  use Data::Monad::CondVar;
+
+  # The sleep sort
+  my @list = (3, 5, 2, 4, 9, 1, 8);
+  my @result;
+  AnyEvent::CondVar->all(
+      map {
+          cv_unit($_)->sleep($_ / 1000)
+                     ->map(sub { push @result, @_ });
+      } @list
+  )->recv;
+
+=head1 DESCRIPTION
+
+Data::Monad::CondVar adds monadic operations to AnyEvent::CondVar.
+
+Since this module extends AnyEvent::CondVar directly, you can call monadic
+methods anywhere there are CondVars.
+
+This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
+
+=head1 METHODS
+
+=over 4
+
+=item as_cv
+
+=item cv_unit
+
+=item cv_zero
+
+=item cv_fail
+
+=item cv_lift
+
+=item cv_sequence
+
+=item call_cc
+
+=item unit
+
+=item fail
+
+=item zero
+
+=item any
+
+=item all
+
+=item cancel
+
+=item canceler
+
+=item flat_map
+
+=item or
+
+=item catch
+
+=item sleep
+
+=item timeout
+
+=back
+
+=head1 AUTHOR
+
+hiratara E<lt>hiratara {at} cpan.orgE<gt>
+
+=head1 SEE ALSO
+
+L<Data::Monad::Base::Monad>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
