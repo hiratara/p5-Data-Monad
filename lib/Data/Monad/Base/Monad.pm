@@ -33,7 +33,8 @@ sub sequence {
 
 sub flat_map {
     my ($self, $f) = @_;
-    die "You should override this method.";
+
+    $self->map($f)->flatten;
 }
 
 sub map {
@@ -78,6 +79,7 @@ Data::Monad::Base::Monad - The base class of any monads.
 Data::Monad::Base::Monad provides some useful functions for any monads.
 
 You must implement unit() and flat_map() according to monad laws.
+Or you may implement flatten() and map() instead of flat_map().
 
 This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 I'll drop many unuseful stuffs in the future.
