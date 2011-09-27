@@ -254,6 +254,32 @@ sub timeout {
     $class->any($class->unit->sleep($sec), $self);
 }
 
+sub retry {
+    my ($self, $retry, $f) = @_;
+    my $class = ref $self;
+
+    $self->flat_map(sub {
+        my @args = @_;
+
+        $class->unit($retry, undef, undef)->while(
+            sub {
+                my ($retry, $ok, $fail) = @_;
+                ! $ok and $retry > 0;
+            }, sub {
+                my ($retry, $ok, $fail) = @_;
+                $f->(@args)->flat_map(sub {
+                    $class->unit($retry - 1, [@_], undef);
+                })->catch(sub {
+                    $class->unit($retry - 1, undef, [@_]);
+                });
+            }
+        )->flat_map(sub {
+            my ($retry, $ok, $fail) = @_;
+            $fail ? $class->fail(@$fail) : $class->unit(@$ok);
+        });
+    });
+}
+
 1;
 
 __END__
@@ -326,6 +352,8 @@ This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 =item sleep
 
 =item timeout
+
+=item retry
 
 =back
 
