@@ -130,7 +130,7 @@ You must implement unit() and flat_map() according to monad laws.
 Or you may implement flatten() and map() instead of flat_map().
 
 This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
-I'll drop many unuseful stuffs in the future.
+I'll drop many useless stuffs in the future.
 
 =head1 METHODS
 
@@ -153,7 +153,7 @@ Packs monads into the new monad.
 
 =item $m2 = $m1->flat_map(sub { ... });
 
-The composition of Kleisli category, which knwon as ">>=" in Haskell.
+The composition of Kleisli category, which known as ">>=" in Haskell.
 
 You must implement this method in sub classes.
 

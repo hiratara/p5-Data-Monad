@@ -8,3 +8,14 @@ __DATA__
 hiratara
 hiratara {at} cpan.org
 Data::Monad
+api
+fmap
+condvar
+condvars
+monad
+monads
+monadic
+monadplus
+kleisli
+haskell
+morphism
