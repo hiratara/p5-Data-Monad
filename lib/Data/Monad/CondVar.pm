@@ -255,7 +255,11 @@ sub timeout {
 }
 
 sub retry {
-    my ($self, $retry, $f) = @_;
+    my $self = shift;
+    my $f = pop;
+    my ($retry, $pace) = @_;
+    $retry ||= 1;
+    $pace ||= 0;
     my $class = ref $self;
 
     $self->flat_map(sub {
@@ -270,7 +274,8 @@ sub retry {
                 $f->(@args)->flat_map(sub {
                     $class->unit($retry - 1, [@_], undef);
                 })->catch(sub {
-                    $class->unit($retry - 1, undef, [@_]);
+                    $class->unit($retry - 1, undef, [@_])
+                          ->sleep($pace);
                 });
             }
         )->flat_map(sub {

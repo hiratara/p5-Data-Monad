@@ -12,9 +12,18 @@ sub say_hello($) {
     };
 }
 
-ok cv_unit("Gaishi Takeuchi")->retry(3, say_hello 2)->recv;
-ok cv_unit("Gaishi Takeuchi")->retry(3, say_hello 3)->recv;
-eval { cv_unit("Gaishi Takeuchi")->retry(3, say_hello 4)->recv };
-ok $@;
+subtest basic => sub {
+    ok cv_unit("Gaishi Takeuchi")->retry(3, say_hello 2)->recv;
+    ok cv_unit("Gaishi Takeuchi")->retry(3, say_hello 3)->recv;
+    eval { cv_unit("Gaishi Takeuchi")->retry(3, say_hello 4)->recv };
+    ok $@;
+};
+
+subtest pace => sub {
+    my $go;
+    cv_unit->sleep(.02)->map(sub { $go++ });
+    is cv_unit->retry(3, .01, sub { $go ? cv_unit "OK" : cv_fail })->recv, 
+       "OK";
+};
 
 done_testing;
