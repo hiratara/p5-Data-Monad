@@ -1,6 +1,7 @@
 package Data::Monad::Base::Monad;
 use strict;
 use warnings;
+use Scalar::Util ();
 use Data::Monad::Base::Sugar;
 
 sub unit {
@@ -84,6 +85,20 @@ sub flatten {
 
 sub ap { (ref $_[0])->lift(sub { my $c = shift; $c->(@_) })->(@_) }
 
+sub while {
+    my ($self, $predicate, $f) = @_;
+
+    my $weaken_loop;
+    my $loop = sub {
+        my @v = @_;
+        $predicate->(@v) ? $f->(@v)->flat_map($weaken_loop)
+                         : (ref $self)->unit(@v);
+    };
+    Scalar::Util::weaken($weaken_loop = $loop);
+
+    $self->flat_map($loop);
+}
+
 1;
 
 __END__
@@ -153,6 +168,8 @@ A natural transformation, which is known as "join" in Haskell.
 =item $m = $mf->ap($m1, $m2,...);
 
 Executes the function which wrapped by the monad.
+
+=item $m = $m->loop(\&predicate, \&f);
 
 =back
 
