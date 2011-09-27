@@ -1,6 +1,7 @@
 package Data::Monad::Base::Monad;
 use strict;
 use warnings;
+use Scalar::Util ();
 use Data::Monad::Base::Sugar;
 
 sub unit {
@@ -31,24 +32,72 @@ sub sequence {
     $class->lift(sub { @_ })->(@_);
 }
 
+sub _welldefined_check {
+    my $self = shift;
+    \&flat_map != $self->can('flat_map') and return;
+    \&map != $self->can('map') and \&flatten != $self->can('flatten')
+                                                                    and return;
+
+    die "You must implement flat_map(), or map() and flatten().";
+}
+
 sub flat_map {
     my ($self, $f) = @_;
-    die "You should override this method.";
+
+    $self->_welldefined_check;
+
+    no strict qw/refs/;
+    *{(ref $self) . "::flat_map"} = sub {
+        my ($self, $f) = @_;
+        $self->map($f)->flatten;
+    };
+
+    $self->flat_map($f);
 }
 
 sub map {
     my ($self, $f) = @_;
 
-    $self->flat_map(sub { (ref $self)->unit($f->(@_)) });
+    $self->_welldefined_check;
+
+    no strict qw/refs/;
+    *{(ref $self) . "::map"} = sub {
+        my ($self, $f) = @_;
+        $self->flat_map(sub { (ref $self)->unit($f->(@_)) });
+    };
+
+    $self->map($f);
 }
 
 sub flatten {
     my $self_duplexed = shift;
 
-    $self_duplexed->flat_map(sub { @_ });
+    $self_duplexed->_welldefined_check;
+
+    no strict qw/refs/;
+    *{(ref $self_duplexed) . "::flatten"} = sub {
+        my $self_duplexed = shift;
+        $self_duplexed->flat_map(sub { @_ });
+    };
+
+    $self_duplexed->flatten;
 }
 
 sub ap { (ref $_[0])->lift(sub { my $c = shift; $c->(@_) })->(@_) }
+
+sub while {
+    my ($self, $predicate, $f) = @_;
+
+    my $weaken_loop;
+    my $loop = sub {
+        my @v = @_;
+        $predicate->(@v) ? $f->(@v)->flat_map($weaken_loop)
+                         : (ref $self)->unit(@v);
+    };
+    Scalar::Util::weaken($weaken_loop = $loop);
+
+    $self->flat_map($loop);
+}
 
 1;
 
@@ -78,6 +127,7 @@ Data::Monad::Base::Monad - The base class of any monads.
 Data::Monad::Base::Monad provides some useful functions for any monads.
 
 You must implement unit() and flat_map() according to monad laws.
+Or you may implement flatten() and map() instead of flat_map().
 
 This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 I'll drop many unuseful stuffs in the future.
@@ -118,6 +168,8 @@ A natural transformation, which is known as "join" in Haskell.
 =item $m = $mf->ap($m1, $m2,...);
 
 Executes the function which wrapped by the monad.
+
+=item $m = $m->loop(\&predicate, \&f);
 
 =back
 
