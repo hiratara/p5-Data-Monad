@@ -12,6 +12,7 @@ api
 fmap
 condvar
 condvars
+cvs
 monad
 monads
 monadic

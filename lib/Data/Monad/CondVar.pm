@@ -320,45 +320,140 @@ This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 
 =over 4
 
-=item as_cv
+=item $cv = as_cv($cb->($cv))
 
-=item cv_unit
+A helper for rewriting functions using callbacks to ones returning CVs.
 
-=item cv_zero
+  my $cv = as_cv { http_get "http://google.ne.jp", $_[0] };
+  my ($data, $headers) = $cv->recv;
 
-=item cv_fail
+=item $cv = cv_unit(@vs)
 
-=item cv_lift
+=item $cv = cv_zero()
 
-=item cv_sequence
+=item $cv = cv_fail($v)
 
-=item call_cc
+=item $cv = cv_lift(\&f)
+
+=item $cv = cv_sequence($cv1, $cv2, ...)
+
+These are shorthand of methods which has the same name.
+
+=item $cv = call_cc($f->($cont))
+
+Calls C<$f> with current continuation, C<$cont>.
+C<$f> must return a CondVar object.
+If you call C<$cont> in C<$f>, results are sent to C<$cv> directly and
+codes left in C<$f> will be skipped.
+
+You can use C<call_cc> to escape a deeply nested call structure.
+
+  sub myname {
+      my $uc = shift;
+
+      return call_cc {
+          my $cont = shift;
+
+          cv_unit("hiratara")->flat_map(sub {
+              return $cont->(@_) unless $uc; # escape from an inner block
+              cv_unit @_;
+          })->map(sub { uc $_[0] });
+      };
+  }
+
+  print myname(0)->recv, "\n"; # hiratara
+  print myname(1)->recv, "\n"; # HIRATARA
 
 =item unit
 
-=item fail
+=item flat_map
+
+Overrides methods of Data::Monad::Base::Monad.
 
 =item zero
 
-=item any
+Overrides methods of Data::Monad::Base::Monad::Zero.
+It uses C<fail> method internally.
 
-=item all
+=item $cv = AnyEvent::CondVar->fail($msg)
 
-=item cancel
+Creates the new CondVar object which represents a failed operation.
+You can use C<catch> to handle failed operations.
 
-=item canceler
+=item $cv = AnyEvent::CondVar->any($cv1, $cv2, ...)
 
-=item flat_map
+Takes the earliest value from C<$cv1>, C<$cv2>, ...
 
-=item or
+=item $cv = AnyEvent::CondVar->all($cv1, $cv2, ...)
 
-=item catch
+Takes all values from C<$cv1>, C<$cv2>, ...
 
-=item sleep
+This method works completely like C<<Data::Monad::Base::Monad->sequence>>,
+but you may want use this method for better cancellation.
 
-=item timeout
+=item $cv->cancel
 
-=item retry
+Cancels computations for this CV. This method just calls the call back
+which is set in the C<canceler> field.
+
+C<<$cv->recv>> may never return from blocking after you call C<cancel>.
+
+=item $cv->canceler($cb->())
+
+=item $code = $cv->canceler
+
+The accessor of the method to cancel. You should set this field appropriately
+when you create the new CondVar object.
+
+  my $cv = AE::cv;
+  my $t = AE::timer $sec, 0, sub {
+      $cv->send(@any_results);
+      $cv->canceler(undef); # Destroy cyclic refs
+  };
+  $cv->canceler(sub { undef $t });
+
+=item $cv = $cv1->or($cv2)
+
+If C<$cv1> croaks, C<or> returns the CondVar object which contains values of
+C<$cv2>. Otherwise it returns C<$cv1>'s values.
+
+C<or> would be C<mplus> on Haskell.
+
+=item $cv = $cv1->catch($cb->($@))
+
+If C<$cv1> croaks, C<$cb> is called and it returns the new CondVar object
+containing its result. Otherwise C<catch> does nothing. C<$cb> must return
+a CondVar object.
+
+You can use this method to handle errors.
+
+  cv_unit(1, 0)
+  ->map(sub { $_[0] / $_[1] })
+  ->catch(sub {
+      my $exception = shift;
+      $exception =~ /Illegal division/
+          ? cv_unit(0)           # recover from errors
+          : cv_fail($exception); # rethrow
+  });
+
+=item $cv = $cv1->sleep($sec)
+
+Sleeps C<$sec> seconds, and just sends values of C<$cv1> to C<$cv>.
+
+=item $cv = $cv1->timeout($sec)
+
+If C<$cv1> doesn't compute any values within C<$sec> seconds,
+C<$cv> will be received C<undef> and C<$cv1> will be canceled.
+
+Otherwise C<$cv> will be received C<$cv1>'s results.
+
+=item $cv = $cv1->retry($max, [$pace, ], $f->(@v))
+
+Continue to call C<flat_map($f)> until C<$f> returns a normal value which
+doesn't croak.
+
+C<$max> is maximum number of retries, C<$pace> is how long it sleeps between
+each retry. The default value of C<$pace> is C<0>.
 
 =back
 
