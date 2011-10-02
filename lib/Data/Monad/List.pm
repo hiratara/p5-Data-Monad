@@ -33,12 +33,17 @@ sub flat_map {
     (ref $self)->new(map { @{$f->(@$_)} } @$self);
 }
 
+sub values {
+    my $self = shift;
+    @$self;
+}
+
 sub scalars {
     my $self = shift;
     map {
         @$_ == 1 or die "contained multiple values.";
         @$_;
-    } @$self;
+    } $self->values;
 }
 
 1;
@@ -98,6 +103,10 @@ Overrides methods of L<Data::Monad::Base::MonadZero>.
 =item flat_map
 
 Overrides methods of L<Data::Monad::Base::Monad>.
+
+=item @values = $list->values
+
+Retrieves list of values from C<$list>
 
 =item @single_values = $list->scalars
 
