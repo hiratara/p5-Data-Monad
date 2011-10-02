@@ -64,19 +64,29 @@ This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 
 =over 4
 
-=item just
+=item $maybe = just(@values)
 
-=item nothing
+=item $maybe = nothing()
+
+Is the constructors of this class.
 
 =item unit
 
-=item zero
-
 =item flat_map
 
-=item is_nothing
+Overrides methods of L<Data::Monad::Base::Monad>.
 
-=item value
+=item zero
+
+Overrides methods of L<Data::Monad::Base::MonadZero>.
+
+=item $maybe->is_nothing
+
+Checks if C<$maybe> contains any values.
+
+=item @values = $maybe->value
+
+Returns a list of values which is contained by C<$maybe>.
 
 =back
 

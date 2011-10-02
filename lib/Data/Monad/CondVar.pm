@@ -333,7 +333,7 @@ A helper for rewriting functions using callbacks to ones returning CVs.
 
 =item $cv = cv_fail($v)
 
-=item $cv = cv_lift(\&f)
+=item $f = cv_lift(\&f)
 
 =item $cv = cv_sequence($cv1, $cv2, ...)
 
@@ -368,11 +368,11 @@ You can use C<call_cc> to escape a deeply nested call structure.
 
 =item flat_map
 
-Overrides methods of Data::Monad::Base::Monad.
+Overrides methods of L<Data::Monad::Base::Monad>.
 
 =item zero
 
-Overrides methods of Data::Monad::Base::Monad::Zero.
+Overrides methods of L<Data::Monad::Base::MonadZero>.
 It uses C<fail> method internally.
 
 =item $cv = AnyEvent::CondVar->fail($msg)

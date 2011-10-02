@@ -152,15 +152,44 @@ The for method is known as "do" expression in Haskell.
 
 =over 4
 
-=item for
+=item $monad = Data::Monad::Base::Sugar::for { ... }
 
-=item pick
+DSL to create a monad value. You can use following functions in the block,
+and shouldn't write sentences other than following functions in the block.
 
-=item let
+All sentences are connected by C<flat_map> automatically.
 
-=item satisfy
+=over 4
 
-=item yield
+=item pick \$value, \&f
+
+=item pick \@values, \&f
+
+=item pick \&f
+
+Retrieves values from the monad, and puts it in C<$value>. C<\&f> should return
+any Monad objects.
+
+You should handle C<$value> as read-only and should use C<$value> only in
+code-refs of other DSL functions.
+
+=item let \$value, \&f
+
+=item let \@values, \&f
+
+Captures the value into C<$value>. C<\&f> can return any values, and the result
+is put in C<$value> directly.
+
+=item satisfy { ... }
+
+Filters values by using C<filter>.
+
+=item yield { ... }
+
+Wraps values in a Monad object by using C<unit> and returns the monad object.
+This sentence should be the last line of DSL.
+
+=back
 
 =back
 

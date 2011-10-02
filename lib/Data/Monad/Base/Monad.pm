@@ -169,7 +169,9 @@ A natural transformation, which is known as "join" in Haskell.
 
 Executes the function which wrapped by the monad.
 
-=item $m = $m->loop(\&predicate, \&f);
+=item $m = $m->while(\&predicate, \&f);
+
+C<flat_map(\&f)> while C<\&predicate> is true.
 
 =back
 

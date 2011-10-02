@@ -69,25 +69,39 @@ This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 
 =over 4
 
-=item scalar_list
+=item $list = scalar_list(@single_values)
 
-=item list_unit
+Is the same as following lines.
 
-=item list_zero
+  $list = Data::Monad::List->new([$single_values[0]], [$single_values[1]], ...)
 
-=item list_lift
+=item $list = list_unit(@values)
 
-=item list_sequence
+=item $list = list_zero()
 
-=item new
+=item $f = list_lift(\&f)
 
-=item unit
+=item $list = list_sequence($list1, $list2, ...)
+
+These are shorthand of methods which has the same name.
+
+=item $list = Data::Monad::List->new(\@values1, \@values2, ...)
+
+The constructor of this class.
 
 =item zero
 
+Overrides methods of L<Data::Monad::Base::MonadZero>.
+
+=item unit
+
 =item flat_map
 
-=item scalars
+Overrides methods of L<Data::Monad::Base::Monad>.
+
+=item @single_values = $list->scalars;
+
+Retrieves values which was set by the C<scalar_list> method.
 
 =back
 
