@@ -99,7 +99,7 @@ Overrides methods of L<Data::Monad::Base::MonadZero>.
 
 Overrides methods of L<Data::Monad::Base::Monad>.
 
-=item @single_values = $list->scalars;
+=item @single_values = $list->scalars
 
 Retrieves values which was set by the C<scalar_list> method.
 
