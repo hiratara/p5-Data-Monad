@@ -9,7 +9,7 @@ sub unit {
     die "You should override this method.";
 }
 
-sub map_multi {
+sub flat_map_multi {
     my ($class, $f, @ms) = @_;
 
     Data::Monad::Base::Sugar::for {
@@ -19,8 +19,14 @@ sub map_multi {
             pick +(my $slot = []) => sub { $ms[$i] };
             push @args, $slot;
         }
-        yield { $f->(map { @$_ } @args) };
+        pick sub { $f->(map { @$_ } @args) };
     };
+}
+
+sub map_multi {
+    my ($class, $f, @ms) = @_;
+
+    $class->flat_map_multi(sub { $class->unit($f->(@_)) }, @ms)
 }
 
 sub sequence {
@@ -137,6 +143,11 @@ I'll drop many useless stuffs in the future.
 A natural transformation, which is known as "return" in Haskell.
 
 You must implement this method in sub classes.
+
+=item $f = SomeMonad->flat_map_multi(sub { ... }, $m1, $m2, ...);
+
+Changes the type of function from (v1, v2, ...) -> m(v0)
+to (m(v1), m(v2), ...) -> m(v0), and apply it to $m1, $m2, ...
 
 =item $f = SomeMonad->map_multi(sub { ... }, $m1, $m2, ...);
 
