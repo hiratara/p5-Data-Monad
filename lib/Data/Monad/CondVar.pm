@@ -5,7 +5,8 @@ use AnyEvent;
 use Scalar::Util;
 use Exporter qw/import/;
 
-our @EXPORT = qw/as_cv cv_unit cv_zero cv_fail cv_lift cv_sequence call_cc/;
+our @EXPORT = qw/as_cv cv_unit cv_zero cv_fail cv_map_multi cv_sequence 
+                 call_cc/;
 
 sub _assert_cv($) {
     $_[0]->ready and die "[BUG]It already has been ready";
@@ -21,7 +22,7 @@ sub as_cv(&) {
 sub cv_unit { AnyEvent::CondVar->unit(@_) }
 sub cv_zero { AnyEvent::CondVar->zero(@_) }
 sub cv_fail { AnyEvent::CondVar->fail(@_) }
-sub cv_lift { AnyEvent::CondVar->lift(@_) }
+sub cv_map_multi(&@) { AnyEvent::CondVar->map_multi(@_) }
 sub cv_sequence { AnyEvent::CondVar->sequence(@_) }
 
 sub call_cc(&) {
@@ -333,7 +334,7 @@ A helper for rewriting functions using callbacks to ones returning CVs.
 
 =item $cv = cv_fail($v)
 
-=item $f = cv_lift(\&f)
+=item $f = cv_map_multi(\&f, $cv1, $cv2, ...)
 
 =item $cv = cv_sequence($cv1, $cv2, ...)
 

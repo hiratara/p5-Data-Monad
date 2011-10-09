@@ -14,10 +14,11 @@ sub sleep_and_send($@) {
     $cv;
 }
 
-is +cv_lift(sub { my $n = 0; $n += $_ for @_; $n })->(
-    sleep_and_send(.02 => 2),
-    sleep_and_send(.0 => 3),
-    sleep_and_send(.01 => 4),
+is +(
+    cv_map_multi { my $n = 0; $n += $_ for @_; $n }
+                 sleep_and_send(.02 => 2),
+                 sleep_and_send(.0 => 3),
+                 sleep_and_send(.01 => 4),
 )->recv, 9;
 
 

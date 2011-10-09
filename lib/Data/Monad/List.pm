@@ -4,13 +4,13 @@ use warnings;
 use Exporter qw/import/;
 use base qw/Data::Monad::Base::MonadZero/;
 
-our @EXPORT = qw/scalar_list list_unit list_zero list_lift list_sequence/;
+our @EXPORT = qw/scalar_list list_unit list_zero list_map_multi list_sequence/;
 
 sub scalar_list(@) { __PACKAGE__->new(map { [$_] } @_) }
 
 sub list_unit { __PACKAGE__->unit(@_) }
 sub list_zero { __PACKAGE__->zero(@_) }
-sub list_lift { __PACKAGE__->lift(@_) }
+sub list_map_multi(&@) { __PACKAGE__->map_multi(@_) }
 sub list_sequence { __PACKAGE__->sequence(@_) }
 
 sub new {
@@ -84,7 +84,7 @@ Is the same as following lines.
 
 =item $list = list_zero()
 
-=item $f = list_lift(\&f)
+=item $f = list_map_multi(\&f, $list1, $list2, ...)
 
 =item $list = list_sequence($list1, $list2, ...)
 

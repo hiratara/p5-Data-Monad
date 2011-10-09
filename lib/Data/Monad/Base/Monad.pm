@@ -9,27 +9,23 @@ sub unit {
     die "You should override this method.";
 }
 
-sub lift {
-    my ($class, $f) = @_;
+sub map_multi {
+    my ($class, $f, @ms) = @_;
 
-    sub {
-        my @ms = @_;
-
-        Data::Monad::Base::Sugar::for {
-            my @args;
-            for my $i (0 .. $#ms) {
-                # capture each value in each slot of @args
-                pick +(my $slot = []) => sub { $ms[$i] };
-                push @args, $slot;
-            }
-            yield { $f->(map { @$_ } @args) };
-        };
+    Data::Monad::Base::Sugar::for {
+        my @args;
+        for my $i (0 .. $#ms) {
+            # capture each value in each slot of @args
+            pick +(my $slot = []) => sub { $ms[$i] };
+            push @args, $slot;
+        }
+        yield { $f->(map { @$_ } @args) };
     };
 }
 
 sub sequence {
     my $class = shift;
-    $class->lift(sub { @_ })->(@_);
+    $class->map_multi(sub { @_ } => @_);
 }
 
 sub _welldefined_check {
@@ -83,7 +79,7 @@ sub flatten {
     $self_duplexed->flatten;
 }
 
-sub ap { (ref $_[0])->lift(sub { my $c = shift; $c->(@_) })->(@_) }
+sub ap { (ref $_[0])->map_multi(sub { my $c = shift; $c->(@_) } => @_) }
 
 sub while {
     my ($self, $predicate, $f) = @_;
@@ -142,10 +138,10 @@ A natural transformation, which is known as "return" in Haskell.
 
 You must implement this method in sub classes.
 
-=item $f = SomeMonad->lift(sub { ... });
+=item $f = SomeMonad->map_multi(sub { ... }, $m1, $m2, ...);
 
 Changes the type of function from (v1, v2, ...) -> v0
-to (m(v1), m(v2), ...) -> m(v0).
+to (m(v1), m(v2), ...) -> m(v0), and apply it to $m1, $m2, ...
 
 =item $m = SomeMonad->sequence($m1, $m2, $m3, ...);
 
