@@ -6,7 +6,6 @@ Makefile
 blib
 inc
 pm_to_blib
-MANIFEST
 Makefile.old
 nytprof.out
 MANIFEST.bak
