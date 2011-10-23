@@ -4,11 +4,12 @@ all_from 'lib/Data/Monad.pm';
 readme_from 'lib/Data/Monad.pm';
 
 requires 'AnyEvent';
+requires 'parent';
 
 tests 't/*.t t/*/*.t';
 author_tests 'xt';
 
-test_requires 'Test::More';
+test_requires 'Test::More' => '0.94';
 test_requires 'Test::Requires';
 auto_set_repository;
 auto_include;
