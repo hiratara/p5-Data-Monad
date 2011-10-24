@@ -1,8 +1,8 @@
 NAME
-    Data::Monad - A implementation of monads for Perl
+    Data::Monad - An implementation of monads for Perl
 
 DESCRIPTION
-    Is a implementation of monads for Perl.
+    Is an implementation of monads for Perl.
 
     This module is marked EXPERIMENTAL. API could be changed without any
     notice.

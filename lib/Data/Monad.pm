@@ -10,11 +10,11 @@ __END__
 
 =head1 NAME
 
-Data::Monad - A implementation of monads for Perl
+Data::Monad - An implementation of monads for Perl
 
 =head1 DESCRIPTION
 
-Is a implementation of monads for Perl.
+Is an implementation of monads for Perl.
 
 This module is marked B<EXPERIMENTAL>. API could be changed without any notice.
 
