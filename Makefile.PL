@@ -3,7 +3,6 @@ name 'Data-Monad';
 all_from 'lib/Data/Monad.pm';
 readme_from 'lib/Data/Monad.pm';
 
-requires 'AnyEvent';
 requires 'parent';
 
 tests 't/*.t t/*/*.t';
