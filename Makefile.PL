@@ -11,7 +11,7 @@ author_tests 'xt';
 test_requires 'Test::More' => '0.94';
 test_requires 'Test::Requires';
 auto_set_repository;
-auto_include;
+auto_include_deps;
 
 resources
     homepage => 'https://github.com/hiratara/p5-Data-Monad',
