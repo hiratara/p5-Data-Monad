@@ -1,5 +1,8 @@
 Revision history for Perl extension Data::Monad
 
+0.03    Tue, 26 Jun 2012 
+        - Fix dependencies (reported by mschwern)
+
 0.02    Sun, 23 Oct 2011
         - Add dependencies
 
