@@ -1,6 +1,7 @@
 package Data::Monad;
 use strict;
 use warnings;
+use 5.012;
 
 our $VERSION = "0.02";
 
