@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Scalar::Util ();
 use Data::Monad::Base::Sugar;
+use Data::Monad::Base::Util qw(list);
 
 sub unit {
     my ($class, @v) = @_;
@@ -31,7 +32,7 @@ sub map_multi {
 
 sub sequence {
     my $class = shift;
-    $class->map_multi(sub { @_ } => @_);
+    $class->map_multi(sub { list @_ } => @_);
 }
 
 sub _welldefined_check {
@@ -79,7 +80,7 @@ sub flatten {
     no strict qw/refs/;
     *{(ref $self_duplexed) . "::flatten"} = sub {
         my $self_duplexed = shift;
-        $self_duplexed->flat_map(sub { @_ });
+        $self_duplexed->flat_map(sub { list @_ });
     };
 
     $self_duplexed->flatten;
