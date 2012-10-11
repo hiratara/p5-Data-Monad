@@ -1,6 +1,7 @@
 package Data::Monad::Base::Monad;
 use strict;
 use warnings;
+use parent "Data::Monad::Base::Functor";
 use Scalar::Util ();
 use Data::Monad::Base::Sugar;
 use Data::Monad::Base::Util qw(list);
