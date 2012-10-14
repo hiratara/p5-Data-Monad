@@ -17,6 +17,7 @@ lib/Data/Monad.pm
 lib/Data/Monad/Base/Monad.pm
 lib/Data/Monad/Base/MonadZero.pm
 lib/Data/Monad/Base/Sugar.pm
+lib/Data/Monad/Base/Util.pm
 lib/Data/Monad/Identity.pm
 lib/Data/Monad/List.pm
 lib/Data/Monad/Maybe.pm
@@ -28,6 +29,7 @@ README
 t/00_compile.t
 t/base/monad-invalid.t
 t/base/monad.t
+t/base/util.t
 t/id/basic.t
 t/list/ap.t
 t/list/basic.t
@@ -39,6 +41,7 @@ t/list/sequence.t
 t/list/while-leaks.t
 t/list/while.t
 t/maybe/basic.t
+t/maybe/flatten.t
 t/singleton/basic.t
 xt/01_podspell.t
 xt/02_perlcritic.t
