@@ -1,6 +1,7 @@
 *~
 *.bk
 cover_db
+MYMETA.*
 META.yml
 Makefile
 blib
@@ -10,3 +11,6 @@ Makefile.old
 nytprof.out
 MANIFEST.bak
 *.sw[po]
+/Data-Monad-*
+/.build
+!META.json

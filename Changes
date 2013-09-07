@@ -1,5 +1,7 @@
 Revision history for Perl extension Data::Monad
 
+{{$NEXT}}
+
 0.04    Sat, 13 Oct 2012 
         - Fix a bug related perl contexts. 
 
