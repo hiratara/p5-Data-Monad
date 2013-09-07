@@ -10,3 +10,6 @@ Makefile.old
 nytprof.out
 MANIFEST.bak
 *.sw[po]
+/Data-Monad-*
+/.build
+!META.json
