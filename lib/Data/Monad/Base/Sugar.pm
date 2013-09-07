@@ -108,9 +108,10 @@ sub for(&) {
                 $info->{yield}->();
             });
         } elsif (@blocks) {
+            my $retained_loop = $weak_loop;
             return $m->flat_map(sub {
                 _capture @_ => $ref;
-                $weak_loop->(@blocks);
+                $retained_loop->(@blocks);
             });
         } else {
             return $m;
