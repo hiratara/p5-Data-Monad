@@ -26,8 +26,7 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "6.59",
-            "Test::More" : "0.94"
+            "ExtUtils::MakeMaker" : "6.59"
          }
       },
       "configure" : {
@@ -45,6 +44,12 @@
             "parent" : "0",
             "perl" : "5.012"
          }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0.94",
+            "Test::Requires" : "0"
+         }
       }
    },
    "release_status" : "stable",
@@ -59,6 +64,6 @@
          "web" : "https://github.com/hiratara/p5-Data-Monad"
       }
    },
-   "version" : "0.05"
+   "version" : "0.06"
 }
 
