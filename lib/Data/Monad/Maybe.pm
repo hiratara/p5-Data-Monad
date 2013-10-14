@@ -26,7 +26,11 @@ sub flat_map {
 }
 
 sub is_nothing { reftype $_[0] ne 'ARRAY' }
-sub value { wantarray ? @{$_[0]} : $_[0][0] }
+
+sub value {
+    my ($self) = @_;
+    $self->is_nothing ? undef : (wantarray ? @{$_[0]} : $_[0][0])
+}
 
 1;
 
