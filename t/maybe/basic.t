@@ -16,6 +16,12 @@ sub get_key($) {
 }
 
 {
+    # Check that nothing->value returns undef instead of
+    # dying with 'Not an ARRAY reference'
+    ok ! defined(nothing->value);
+}
+
+{
     my $maybe = $data->flat_map(get_key 'hage')
                      ->flat_map(get_key 'debu')
                      ->flat_map(get_key 'me');
