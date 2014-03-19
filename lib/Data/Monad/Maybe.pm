@@ -2,6 +2,7 @@ package Data::Monad::Maybe;
 use strict;
 use warnings;
 use parent qw/Data::Monad::Base::MonadZero/;
+use Carp ();
 use Scalar::Util qw/reftype/;
 use Exporter qw/import/;
 
@@ -26,7 +27,16 @@ sub flat_map {
 }
 
 sub is_nothing { reftype $_[0] ne 'ARRAY' }
-sub value { wantarray ? @{$_[0]} : $_[0][0] }
+
+sub value {
+    my ($self) = @_;
+    if ($self->is_nothing) {
+        Carp::carp "nothing has no values";
+        ();
+    } else {
+        wantarray ? @$self : $self->[0];
+    }
+}
 
 1;
 
