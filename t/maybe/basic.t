@@ -3,6 +3,7 @@ use warnings;
 use Data::Monad::Maybe qw/just nothing/;
 use Data::Monad::Base::Sugar;
 use Test::More;
+use Test::Warnings qw(warning);
 
 my $data = just { hage => { debu => { me => 1 } } };
 
@@ -18,7 +19,9 @@ sub get_key($) {
 {
     # Check that nothing->value returns undef instead of
     # dying with 'Not an ARRAY reference'
-    ok ! defined(nothing->value);
+    like warning {
+        ok ! (my @val = nothing->value);
+    }, qr/nothing has no values/;
 }
 
 {
