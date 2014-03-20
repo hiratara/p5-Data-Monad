@@ -14,7 +14,7 @@ hiratara <hiratara {at} cpan.org>
 
 # SEE ALSO
 
-[http://horna.org.ua/books/All\_About\_Monads.pdf](http://horna.org.ua/books/All\_About\_Monads.pdf)
+[http://horna.org.ua/books/All\_About\_Monads.pdf](http://horna.org.ua/books/All_About_Monads.pdf)
 
 # LICENSE
 
