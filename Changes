@@ -1,6 +1,7 @@
 Revision history for Perl module Data::Monad
 
 {{$NEXT}}
+    - Make nothing->value return an empty list (by nmbooker)
 
 0.06  2013-09-13 16:29:48 JST
         - Fix dependencies while testing.
