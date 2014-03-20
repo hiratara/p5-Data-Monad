@@ -8,4 +8,5 @@ on build => sub {
 on test => sub {
     requires 'Test::More', '0.94';
     requires 'Test::Requires';
+    requires 'Test::Warnings';
 };
