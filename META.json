@@ -31,7 +31,7 @@
       },
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.034"
+            "Module::Build::Tiny" : "0.035"
          }
       },
       "develop" : {
@@ -65,7 +65,7 @@
          "web" : "https://github.com/hiratara/p5-Data-Monad"
       }
    },
-   "version" : "0.06",
+   "version" : "0.07",
    "x_contributors" : [
       "Masahiro Honma <hira.tara@gmail.com>",
       "Neil Bowers <neil@bowers.com>",

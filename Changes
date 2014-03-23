@@ -1,6 +1,8 @@
 Revision history for Perl module Data::Monad
 
 {{$NEXT}}
+
+0.07  2014-03-23 14:38:50 JST
     - Make nothing->value return an empty list (by nmbooker)
 
 0.06  2013-09-13 16:29:48 JST
