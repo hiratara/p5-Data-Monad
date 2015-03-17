@@ -6,7 +6,7 @@ Data::Monad - An implementation of monads for Perl
 
 Is an implementation of monads for Perl.
 
-This module is marked __EXPERIMENTAL__. API could be changed without any notice.
+This module is marked **EXPERIMENTAL**. API could be changed without any notice.
 
 # AUTHOR
 
