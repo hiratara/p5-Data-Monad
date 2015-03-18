@@ -1,6 +1,8 @@
 Revision history for Perl module Data::Monad
 
 {{$NEXT}}
+
+0.08  2015-03-18 21:38:29 JST
     - Implement the Either monad (by aereal)
 
 0.07  2014-03-23 14:38:50 JST
