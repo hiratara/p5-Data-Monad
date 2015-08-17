@@ -43,6 +43,12 @@ sub value {
     return wantarray ? @$self : $self->[0];
 }
 
+sub fold {
+    my ($self, $left_accum, $right_accum) = @_;
+    my $accum = $self->is_right ? $right_accum : $left_accum;
+    return $accum->($self->value);
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -108,6 +114,12 @@ Overrides methods of L<Data::Monad::Base::Monad>
 =item @values = $either->value
 
 Returns a list of values which is contained by C<$either>
+
+=item $folded = $either->fold(sub { ... }, sub { ... });
+
+Run the first function if left, or the second.
+
+These given functions take a value contained by C<$either>.
 
 =back
 
