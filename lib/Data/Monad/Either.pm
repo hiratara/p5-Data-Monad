@@ -65,6 +65,14 @@ sub get_or_else {
     );
 }
 
+sub value_or {
+    my ($self, $or) = @_;
+    return $self->fold(
+      $or,
+      sub { return wantarray ? @_ : $_[0] },
+    );
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -144,6 +152,10 @@ Returns this Either monad if it is right, or returns the given value.
 =item $value_or = $either->get_or_else(sub { ... });
 
 Returns the values contains by this, or returns the given default value.
+
+=item $value_or = $either->value_or(sub { ... });
+
+Returns the values contains by this, or runs the given default function on the left value.
 
 =back
 

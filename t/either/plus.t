@@ -26,4 +26,14 @@ subtest 'get_or_else' => sub {
     is_deeply [ right(10, 20, 30)->get_or_else('else') ], [ 10, 20, 30 ];
 };
 
+subtest 'value_or' => sub {
+    is left('failure')->value_or(sub {
+        $_[0] . '!';
+    }), 'failure!';
+    is right(10)->value_or(sub {
+        $_[0] . '!';
+    }), 10;
+    is_deeply [ right(10, 20, 30)->value_or(sub { $_[0] . '!' }) ], [ 10, 20, 30 ];
+};
+
 done_testing;
