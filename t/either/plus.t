@@ -20,4 +20,10 @@ subtest 'or_else' => sub {
     is_deeply right(10)->or_else(right('else')), right(10);
 };
 
+subtest 'get_or_else' => sub {
+    is left('failure')->get_or_else('else'), 'else';
+    is right(10)->get_or_else('else'), 10;
+    is_deeply [ right(10, 20, 30)->get_or_else('else') ], [ 10, 20, 30 ];
+};
+
 done_testing;
