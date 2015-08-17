@@ -41,4 +41,9 @@ subtest 'swap' => sub {
     is_deeply right(10)->swap, left(10);
 };
 
+subtest 'left_map' => sub {
+    is_deeply left('failure')->left_map(sub { { error => $_[0] } }), left({ error => 'failure' });
+    is_deeply right(10)->left_map(sub { { error => $_[0] } }), right(10);
+};
+
 done_testing;

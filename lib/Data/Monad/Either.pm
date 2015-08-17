@@ -81,6 +81,14 @@ sub swap {
     )
 }
 
+sub left_map {
+    my ($self, $f) = @_;
+    return $self->fold(
+      sub { return left($f->(@_)) },
+      sub { return right(@_) },
+    );
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -168,6 +176,10 @@ Returns the values contains by this, or runs the given default function on the l
 =item $swapped = $either->swap;
 
 Flip the left right values.
+
+=item $either = $either->left_map(sub { ... });
+
+Run the given function on the left value.
 
 =back
 
