@@ -49,6 +49,14 @@ sub fold {
     return $accum->($self->value);
 }
 
+sub or_else {
+    my ($self, $else) = @_;
+    return $self->fold(
+      sub { return $else },
+      sub { return right(@_) },
+    );
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -120,6 +128,10 @@ Returns a list of values which is contained by C<$either>
 Run the first function if left, or the second.
 
 These given functions take a value contained by C<$either>.
+
+=item $either_or = $either->or_else($else);
+
+Returns this Either monad if it is right, or returns the given value.
 
 =back
 

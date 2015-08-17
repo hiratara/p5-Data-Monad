@@ -15,4 +15,9 @@ subtest 'fold' => sub {
     ), 20;
 };
 
+subtest 'or_else' => sub {
+    is_deeply left('failure')->or_else(right('else')), right('else');
+    is_deeply right(10)->or_else(right('else')), right(10);
+};
+
 done_testing;
