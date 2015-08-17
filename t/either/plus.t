@@ -36,4 +36,9 @@ subtest 'value_or' => sub {
     is_deeply [ right(10, 20, 30)->value_or(sub { $_[0] . '!' }) ], [ 10, 20, 30 ];
 };
 
+subtest 'swap' => sub {
+    is_deeply left('failure')->swap, right('failure');
+    is_deeply right(10)->swap, left(10);
+};
+
 done_testing;

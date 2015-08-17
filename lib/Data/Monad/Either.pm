@@ -73,6 +73,14 @@ sub value_or {
     );
 }
 
+sub swap {
+    my ($self) = @_;
+    return $self->fold(
+      sub { return right(@_) },
+      sub { return left(@_) },
+    )
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -156,6 +164,10 @@ Returns the values contains by this, or returns the given default value.
 =item $value_or = $either->value_or(sub { ... });
 
 Returns the values contains by this, or runs the given default function on the left value.
+
+=item $swapped = $either->swap;
+
+Flip the left right values.
 
 =back
 
