@@ -165,7 +165,7 @@ These given functions take a value contained by C<$either>.
 
 Returns this Either monad if it is right, or returns the given value.
 
-=item $value_or = $either->get_or_else(sub { ... });
+=item $value_or = $either->get_or_else($value_else);
 
 Returns the values contains by this, or returns the given default value.
 
