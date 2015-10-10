@@ -1,5 +1,5 @@
 package Data::Monad::Identity;
-use strict;
+use strict; use warnings;
 use base;
 use parent qw/Data::Monad::Base::Monad/;
 
