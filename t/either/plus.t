@@ -26,6 +26,17 @@ subtest 'get_or_else' => sub {
     is_deeply [ right(10, 20, 30)->get_or_else('else') ], [ 10, 20, 30 ];
 };
 
+subtest 'or_else_multi' => sub {
+    is_deeply left('failure')->or_else(right('else1', 'else2')), right('else1', 'else2');
+    is_deeply right(10)->or_else(right('else1', 'else2')), right(10);
+};
+
+subtest 'get_or_else_multi' => sub {
+    is_deeply [left('failure')->get_or_else('else1', 'else2')], [qw(else1 else2)];
+    is right(10)->get_or_else('else1', 'else2'), 10;
+    is_deeply [ right(10, 20, 30)->get_or_else('else1', 'else2') ], [ 10, 20, 30 ];
+};
+
 subtest 'value_or' => sub {
     is left('failure')->value_or(sub {
         $_[0] . '!';

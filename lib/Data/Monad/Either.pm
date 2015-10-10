@@ -58,8 +58,8 @@ sub or_else {
 }
 
 sub get_or_else {
-    my ($self, $else) = @_;
-    return $self->value_or(sub { $else });
+    my ($self, @else) = @_;
+    return $self->value_or(sub { wantarray ? @else : $else[0] });
 }
 
 sub value_or {
@@ -162,7 +162,7 @@ These given functions take a value contained by C<$either>.
 
 Returns this Either monad if it is right, or returns the given value.
 
-=item $value_or = $either->get_or_else($value_else);
+=item $get_or_else = $either->get_or_else(@value_else);
 
 Returns the values contains by this, or returns the given default value.
 
