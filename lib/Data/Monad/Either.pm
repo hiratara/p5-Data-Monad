@@ -43,6 +43,52 @@ sub value {
     return wantarray ? @$self : $self->[0];
 }
 
+sub fold {
+    my ($self, $left_accum, $right_accum) = @_;
+    my $accum = $self->is_right ? $right_accum : $left_accum;
+    return $accum->($self->value);
+}
+
+sub or_else {
+    my ($self, $else) = @_;
+    return $self->fold(
+      sub { return $else },
+      sub { return right(@_) },
+    );
+}
+
+sub get_or_else {
+    my ($self, $else) = @_;
+    return $self->fold(
+      sub { return $else },
+      sub { return wantarray ? @_ : $_[0] },
+    );
+}
+
+sub value_or {
+    my ($self, $or) = @_;
+    return $self->fold(
+      $or,
+      sub { return wantarray ? @_ : $_[0] },
+    );
+}
+
+sub swap {
+    my ($self) = @_;
+    return $self->fold(
+      sub { return right(@_) },
+      sub { return left(@_) },
+    )
+}
+
+sub left_map {
+    my ($self, $f) = @_;
+    return $self->fold(
+      sub { return left($f->(@_)) },
+      sub { return right(@_) },
+    );
+}
+
 package Data::Monad::Either::Left;
 use parent -norequire, 'Data::Monad::Either';
 
@@ -108,6 +154,32 @@ Overrides methods of L<Data::Monad::Base::Monad>
 =item @values = $either->value
 
 Returns a list of values which is contained by C<$either>
+
+=item $folded = $either->fold(sub { ... }, sub { ... });
+
+Run the first function if left, or the second.
+
+These given functions take a value contained by C<$either>.
+
+=item $either_or = $either->or_else($else);
+
+Returns this Either monad if it is right, or returns the given value.
+
+=item $value_or = $either->get_or_else(sub { ... });
+
+Returns the values contains by this, or returns the given default value.
+
+=item $value_or = $either->value_or(sub { ... });
+
+Returns the values contains by this, or runs the given default function on the left value.
+
+=item $swapped = $either->swap;
+
+Flip the left right values.
+
+=item $either = $either->left_map(sub { ... });
+
+Run the given function on the left value.
 
 =back
 
