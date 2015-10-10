@@ -10,7 +10,7 @@ This module is marked **EXPERIMENTAL**. API could be changed without any notice.
 
 # AUTHOR
 
-hiratara <hiratara {at} cpan.org>
+hiratara &lt;hiratara {at} cpan.org>
 
 # SEE ALSO
 
