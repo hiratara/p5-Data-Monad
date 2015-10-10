@@ -59,10 +59,7 @@ sub or_else {
 
 sub get_or_else {
     my ($self, $else) = @_;
-    return $self->fold(
-      sub { return $else },
-      sub { return wantarray ? @_ : $_[0] },
-    );
+    return $self->value_or(sub { $else });
 }
 
 sub value_or {
